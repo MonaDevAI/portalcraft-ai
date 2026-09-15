@@ -18,19 +18,37 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $output = Join-Path $repository '.context-iq'
-$forceArgument = if ($Force) { @('--force') } else { @() }
+$generateArguments = @(
+    'run',
+    '--project', $tool,
+    '--',
+    'generate', $repository,
+    '--output', $output
+)
+if ($Force) {
+    $generateArguments += '--force'
+}
 
-& dotnet run --project $tool -- generate $repository --output $output @forceArgument
+& dotnet @generateArguments
 if ($LASTEXITCODE -ne 0) {
     throw 'Context IQ repository generation failed.'
 }
 
 $scenarioOutput = Join-Path $output 'pr-scenarios'
-& dotnet run --project $tool -- pr-scenarios $repository `
-    --branch $Branch `
-    --since-days $SinceDays `
-    --output $scenarioOutput `
-    @forceArgument
+$scenarioArguments = @(
+    'run',
+    '--project', $tool,
+    '--',
+    'pr-scenarios', $repository,
+    '--branch', $Branch,
+    '--since-days', $SinceDays,
+    '--output', $scenarioOutput
+)
+if ($Force) {
+    $scenarioArguments += '--force'
+}
+
+& dotnet @scenarioArguments
 if ($LASTEXITCODE -ne 0) {
     throw 'Context IQ PR scenario generation failed.'
 }
