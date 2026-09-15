@@ -1,0 +1,156 @@
+# Context IQ
+
+Context IQ is a complete, generic reference implementation of governed conversational assistance for a React application backed by a .NET API.
+
+The sample product is **Operations Hub**. It uses synthetic service requests and demonstrates:
+
+- “Show my recent requests”
+- “Show requests created by Alex”
+- request details and grounded source metadata
+- conversational continuity from a request to its review ticket
+- opening a review ticket in a read-only review queue
+- explicit handling when a request has no review ticket
+- typed, deterministic intent routing instead of unrestricted model output
+
+No product source, internal URLs, credentials, or production data are included.
+
+## Repository structure
+
+```text
+client/                 React + TypeScript application
+server/ContextIq.Api/   ASP.NET Core API
+server/ContextIq.Tests/ xUnit tests
+docs/                   architecture and demo script
+video/                  product-neutral demo and captions
+scripts/                local startup helpers
+tools/ContextIq.RepoTool/ repository discovery and integration generator
+```
+
+## Onboard another repository
+
+The repository tool scans React/JavaScript and ASP.NET Core source, inventories UI routes
+and API operations, proposes read-only Context IQ queries, and generates separate React
+and .NET integration scaffolding:
+
+```powershell
+dotnet run --project tools\ContextIq.RepoTool -- analyze C:\path\to\product
+
+dotnet run --project tools\ContextIq.RepoTool -- generate C:\path\to\product `
+  --output C:\path\to\product\.context-iq
+```
+
+Generated output includes:
+
+- `context-iq.manifest.json` with discovered evidence and query candidates
+- `server\ContextIqGeneratedCatalog.cs` with a typed catalog API
+- `client\contextIq.generated.ts` with typed query descriptors
+- `client\ContextIqGeneratedPanel.tsx` with reusable prompt UI
+- integration instructions and safety checks
+
+Discovered `GET` operations and clearly named read-only POST searches (`search`, `filter`,
+`lookup`, or `query`) become query candidates. Create, update, submit, approve, reject,
+delete, generate, upload, and import operations are never exposed automatically. The
+generator does not modify product source and refuses to overwrite a non-empty output
+directory unless `--force` is supplied.
+
+The tool can also be packed and installed:
+
+```powershell
+dotnet pack tools\ContextIq.RepoTool -c Release
+dotnet tool install --global --add-source tools\ContextIq.RepoTool\bin\Release ContextIq.RepoTool
+context-iq-repo analyze C:\path\to\product
+```
+
+For end-to-end setup, branding, generation, and integration checks, see
+[Installation and repository onboarding](docs/installation.md). A one-command
+PowerShell helper is also available:
+
+```powershell
+.\scripts\install-context-iq.ps1 `
+  -TargetRepository C:\path\to\product `
+  -Branch main `
+  -ProductName "Service Workspace" `
+  -AssistantName "Workspace Assistant"
+```
+
+### Generate scenarios from recent PRs
+
+The tool can inspect first-parent history on `develop`, `main`, or an explicitly selected
+branch and derive test scenarios from the changed UI, API, security, data, and test surfaces:
+
+```powershell
+dotnet run --project tools\ContextIq.RepoTool -- pr-scenarios C:\path\to\product `
+  --branch develop --since-days 30 --limit 50 `
+  --output C:\path\to\product\.context-iq\pr-scenarios
+```
+
+It writes both `pr-test-scenarios.json` and `pr-test-scenarios.md`. Merge commits and
+squash commits with PR numbers are labeled as PRs; other first-parent commits are retained
+as commit-level fallbacks so recent behavior is not silently omitted.
+
+## Run locally
+
+Requirements:
+
+- Node.js 20 or later
+- .NET 8 SDK
+
+From two terminals:
+
+```powershell
+dotnet run --project server\ContextIq.Api
+```
+
+```powershell
+cd client
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. The client proxies `/api` to http://localhost:5080.
+
+Alternatively:
+
+```powershell
+.\scripts\start-local.ps1
+```
+
+### Installation branding
+
+Copy `client\.env.example` to `client\.env` and set the product and assistant names:
+
+```dotenv
+VITE_PRODUCT_NAME=Service Workspace
+VITE_ASSISTANT_NAME=Workspace Assistant
+```
+
+The defaults remain `Operations Hub` and `Context IQ`. These values are compiled into the
+frontend, so restart the development server or rebuild after changing them.
+
+## Validate
+
+```powershell
+dotnet test server\ContextIq.sln
+
+cd client
+npm install
+npm test
+npm run build
+```
+
+## Safety model
+
+- The sample tools are read-only.
+- The server validates and routes supported intents.
+- Responses include typed source metadata.
+- Navigation uses application-owned identifiers.
+- Missing identifiers trigger clarification.
+- Missing review-ticket values are never invented.
+- Approval, rejection, submission, deletion, and other mutations are intentionally absent.
+
+## Demo
+
+- [Live generic Context IQ demo](video/Context-IQ-Generic-Live-Demo.mp4)
+- [English captions](video/Context-IQ-Generic-Live-Demo.srt)
+- [Demo script](docs/demo-script.md)
+- [Architecture](docs/architecture.md)

@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+client/node_modules/
+client/dist/
+*.tsbuildinfo
+server/**/bin/
+server/**/obj/
+tools/**/bin/
+tools/**/obj/
+video/.recording/

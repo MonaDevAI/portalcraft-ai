@@ -1,0 +1,23 @@
+1
+00:00:00,000 --> 00:00:04,500
+Context IQ is a reusable React and .NET assistant.
+
+2
+00:00:04,500 --> 00:00:11,000
+In this live Operations Hub demo, Alex finds recent requests from trusted API data.
+
+3
+00:00:11,000 --> 00:00:17,500
+Alex selects REQ-1042 and follows its review ticket to the review queue.
+
+4
+00:00:17,500 --> 00:00:22,500
+The same grounded identifiers appear in the product view.
+
+5
+00:00:22,500 --> 00:00:27,500
+Missing review tickets are explicit, and mutation attempts are blocked.
+
+6
+00:00:27,500 --> 00:00:31,400
+Installations can choose a product-neutral name and replace product adapters without changing the reusable shell.
