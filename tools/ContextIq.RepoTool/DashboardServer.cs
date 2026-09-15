@@ -28,17 +28,32 @@ public static class DashboardServer
         while (true)
         {
             using var client = listener.AcceptTcpClient();
-            using var stream = client.GetStream();
-            ReadRequestHeaders(stream);
-            var headers = Encoding.ASCII.GetBytes(
-                "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html; charset=utf-8\r\n" +
-                $"Content-Length: {html.Length}\r\n" +
-                "Cache-Control: no-store\r\n" +
-                "Connection: close\r\n\r\n");
-            stream.Write(headers);
-            stream.Write(html);
+            try
+            {
+                using var stream = client.GetStream();
+                ReadRequestHeaders(stream);
+                var headers = Encoding.ASCII.GetBytes(
+                    "HTTP/1.1 200 OK\r\n" +
+                    "Content-Type: text/html; charset=utf-8\r\n" +
+                    $"Content-Length: {html.Length}\r\n" +
+                    "Cache-Control: no-store\r\n" +
+                    "Connection: close\r\n\r\n");
+                stream.Write(headers);
+                stream.Write(html);
+            }
+            catch (IOException exception) when (IsClientDisconnect(exception))
+            {
+                // Browsers can close speculative or superseded requests before the response completes.
+            }
         }
+    }
+
+    private static bool IsClientDisconnect(IOException exception)
+    {
+        return exception.InnerException is SocketException socketException
+            && socketException.SocketErrorCode is SocketError.ConnectionAborted
+                or SocketError.ConnectionReset
+                or SocketError.Shutdown;
     }
 
     private static void ReadRequestHeaders(NetworkStream stream)
