@@ -159,6 +159,8 @@ npm run build
 
 ## Demo
 
+- [Hackathon installation, live workflow, and architecture demo](video/Context-IQ-Hackathon-Demo.mp4)
+- [Hackathon demo captions](video/Context-IQ-Hackathon-Demo.srt)
 - [Live generic Context IQ demo](video/Context-IQ-Generic-Live-Demo.mp4)
 - [English captions](video/Context-IQ-Generic-Live-Demo.srt)
 - [Demo script](docs/demo-script.md)
