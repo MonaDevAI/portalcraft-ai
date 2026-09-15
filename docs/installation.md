@@ -94,6 +94,16 @@ The installation helper runs generation and branch analysis together:
 It writes only under the target repository's `.context-iq` directory. Existing
 non-empty output is protected unless `-Force` is explicitly supplied.
 
+## Preview the generated dashboard
+
+```powershell
+dotnet run --project tools\ContextIq.RepoTool -- serve C:\path\to\product\.context-iq
+```
+
+Open `http://127.0.0.1:4318`. The dashboard shows discovered API operations,
+read-only classifications, UI routes, and suggested queries. It reads only the
+generated manifest and does not execute the target repository.
+
 ## Integration checklist
 
 1. Review every discovered operation and remove false positives.

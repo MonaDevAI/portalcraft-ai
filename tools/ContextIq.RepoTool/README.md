@@ -8,6 +8,7 @@ first-parent branch history.
 context-iq-repo analyze C:\path\to\product
 context-iq-repo generate C:\path\to\product --output C:\path\to\product\.context-iq
 context-iq-repo pr-scenarios C:\path\to\product --branch main --since-days 30
+context-iq-repo serve C:\path\to\product\.context-iq
 ```
 
 Generated output must be reviewed. The tool does not execute repository code,

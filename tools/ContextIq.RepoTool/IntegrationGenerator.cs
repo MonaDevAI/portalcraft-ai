@@ -34,6 +34,7 @@ public sealed class IntegrationGenerator
         Write(output, "server/ContextIqGeneratedCatalog.cs", BuildServerCatalog(profile), files);
         Write(output, "client/contextIq.generated.ts", BuildClientCatalog(profile), files);
         Write(output, "client/ContextIqGeneratedPanel.tsx", BuildClientPanel(), files);
+        Write(output, "dashboard/index.html", BuildDashboard(profile), files);
         Write(output, "README.md", BuildReadme(profile), files);
         return new(profile, output, files);
     }
@@ -153,7 +154,97 @@ public sealed class IntegrationGenerator
 
         Generated files are scaffolding, not an authorization boundary. Product APIs must continue to enforce
         authentication, authorization, validation, audit, and data classification.
+
+        ## Preview
+
+        From the Context IQ source repository:
+
+        `dotnet run --project tools/ContextIq.RepoTool -- serve "{{profile.Repository}}/.context-iq"`
         """;
+
+    private static string BuildDashboard(RepositoryProfile profile)
+    {
+        var data = JsonSerializer.Serialize(profile, JsonOptions)
+            .Replace("</", "<\\/", StringComparison.Ordinal);
+        return $$"""
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Context IQ repository dashboard</title>
+          <style>
+            :root { font-family: Segoe UI, Arial, sans-serif; color: #172033; background: #eef3f8; }
+            body { margin: 0; }
+            header { padding: 22px 30px; color: white; background: #172033; }
+            header h1 { margin: 0 0 5px; }
+            header p { margin: 0; color: #c9d6e5; }
+            main { padding: 26px 30px 50px; }
+            .metrics { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 14px; }
+            .card, section { border: 1px solid #d7dee8; border-radius: 12px; background: white; box-shadow: 0 3px 12px #1720330d; }
+            .card { padding: 18px; }
+            .card span { display: block; color: #5b6879; font-size: 13px; }
+            .card strong { display: block; margin-top: 8px; font-size: 30px; }
+            section { margin-top: 20px; padding: 20px; overflow-x: auto; }
+            h2 { margin: 0 0 15px; }
+            table { width: 100%; border-collapse: collapse; font-size: 13px; }
+            th, td { padding: 10px; border-bottom: 1px solid #edf1f5; text-align: left; vertical-align: top; }
+            th { color: #526173; }
+            code { color: #005a9e; }
+            .safe { color: #107c10; font-weight: 700; }
+            .blocked { color: #a4262c; font-weight: 700; }
+            @media (max-width: 800px) { .metrics { grid-template-columns: repeat(2, 1fr); } main { padding: 18px; } }
+          </style>
+        </head>
+        <body>
+          <header>
+            <h1>Context IQ repository dashboard</h1>
+            <p id="repository"></p>
+          </header>
+          <main>
+            <div class="metrics" id="metrics"></div>
+            <section>
+              <h2>Suggested read-only queries</h2>
+              <table><thead><tr><th>Prompt</th><th>Operation</th><th>View</th><th>Parameters</th></tr></thead><tbody id="queries"></tbody></table>
+            </section>
+            <section>
+              <h2>Discovered API operations</h2>
+              <table><thead><tr><th>Method</th><th>Route</th><th>Classification</th><th>Source</th></tr></thead><tbody id="operations"></tbody></table>
+            </section>
+            <section>
+              <h2>Discovered UI routes</h2>
+              <table><thead><tr><th>Route</th><th>Source</th></tr></thead><tbody id="routes"></tbody></table>
+            </section>
+          </main>
+          <script>
+            const data = {{data}};
+            const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({
+              "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            })[character]);
+            document.getElementById("repository").textContent = data.repository;
+            const metrics = [
+              ["API operations", data.apiOperations.length],
+              ["Read-only operations", data.apiOperations.filter(item => item.readOnly).length],
+              ["UI routes", data.uiRoutes.length],
+              ["Query candidates", data.queryCandidates.length]
+            ];
+            document.getElementById("metrics").innerHTML = metrics
+              .map(([label, value]) => `<div class="card"><span>${escapeHtml(label)}</span><strong>${value}</strong></div>`)
+              .join("");
+            document.getElementById("queries").innerHTML = data.queryCandidates
+              .map(item => `<tr><td>${escapeHtml(item.prompt)}</td><td><code>${escapeHtml(item.operationId)}</code></td><td>${escapeHtml(item.viewPath || "Review required")}</td><td>${escapeHtml(item.parameters.join(", ") || "None")}</td></tr>`)
+              .join("");
+            document.getElementById("operations").innerHTML = data.apiOperations
+              .map(item => `<tr><td>${escapeHtml(item.method)}</td><td><code>${escapeHtml(item.route)}</code></td><td class="${item.readOnly ? "safe" : "blocked"}">${item.readOnly ? "Read-only candidate" : "Excluded mutation"}</td><td>${escapeHtml(item.source)}</td></tr>`)
+              .join("");
+            document.getElementById("routes").innerHTML = data.uiRoutes
+              .map(item => `<tr><td><code>${escapeHtml(item.path)}</code></td><td>${escapeHtml(item.source)}</td></tr>`)
+              .join("");
+          </script>
+        </body>
+        </html>
+        """;
+    }
 
     private static string Escape(string value) =>
         value.Replace("\\", "\\\\").Replace("\"", "\\\"");

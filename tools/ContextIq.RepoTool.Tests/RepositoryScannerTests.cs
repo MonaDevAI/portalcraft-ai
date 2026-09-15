@@ -80,7 +80,7 @@ public sealed class RepositoryScannerTests : IDisposable
 
         var result = new IntegrationGenerator().Generate(profile, output);
 
-        Assert.Equal(5, result.Files.Count);
+        Assert.Equal(6, result.Files.Count);
         Assert.True(File.Exists(Path.Combine(output, "context-iq.manifest.json")));
         Assert.Contains(
             "MapContextIqGeneratedCatalog",
@@ -88,6 +88,9 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains(
             "ContextIqGeneratedPanel",
             File.ReadAllText(Path.Combine(output, "client", "ContextIqGeneratedPanel.tsx")));
+        Assert.Contains(
+            "Context IQ repository dashboard",
+            File.ReadAllText(Path.Combine(output, "dashboard", "index.html")));
     }
 
     [Fact]

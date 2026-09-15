@@ -24,7 +24,7 @@ public static class RepoToolCli
         }
 
         var command = args[0].ToLowerInvariant();
-        if (command is not ("analyze" or "generate" or "pr-scenarios"))
+        if (command is not ("analyze" or "generate" or "pr-scenarios" or "serve"))
         {
             throw new ArgumentException($"Unknown command '{args[0]}'.");
         }
@@ -34,6 +34,12 @@ public static class RepoToolCli
         }
 
         var repository = Path.GetFullPath(args[1]);
+        if (command == "serve")
+        {
+            DashboardServer.Run(repository, GetIntOption(args, "--port", 4318));
+            return 0;
+        }
+
         if (command == "pr-scenarios")
         {
             var branch = GetOption(args, "--branch");
@@ -135,6 +141,7 @@ public static class RepoToolCli
               pr-scenarios <repository> [--branch <name>] [--since-days <n>]
                            [--limit <n>] [--output <dir>] [--force]
                                                                Derive test scenarios from recent branch changes.
+              serve <generated-directory> [--port <n>]          Run the generated repository dashboard.
 
             Only discovered GET operations become automatic query candidates.
             Generated output must be reviewed before product integration.

@@ -43,3 +43,5 @@ VITE_ASSISTANT_NAME=$AssistantName
 
 Write-Host "Context IQ onboarding generated at $output"
 Write-Host 'Review the manifest, generated source, authorization boundaries, and PR scenarios before integration.'
+Write-Host "Preview the dashboard with:"
+Write-Host "dotnet run --project `"$tool`" -- serve `"$output`""

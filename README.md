@@ -45,6 +45,7 @@ Generated output includes:
 - `server\ContextIqGeneratedCatalog.cs` with a typed catalog API
 - `client\contextIq.generated.ts` with typed query descriptors
 - `client\ContextIqGeneratedPanel.tsx` with reusable prompt UI
+- `dashboard\index.html` with an immediately runnable repository dashboard
 - integration instructions and safety checks
 
 Discovered `GET` operations and clearly named read-only POST searches (`search`, `filter`,
@@ -72,6 +73,14 @@ PowerShell helper is also available:
   -ProductName "Service Workspace" `
   -AssistantName "Workspace Assistant"
 ```
+
+Then preview the generated repository dashboard:
+
+```powershell
+dotnet run --project tools\ContextIq.RepoTool -- serve C:\path\to\product\.context-iq
+```
+
+Open `http://127.0.0.1:4318`.
 
 ### Generate scenarios from recent PRs
 
