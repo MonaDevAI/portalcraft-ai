@@ -2,37 +2,30 @@
 
 ![PortalCraft AI logo](assets/portalcraft-ai-logo.svg)
 
-PortalCraft AI is a governed agent framework for safely assisting users inside enterprise
-portals. Generic copilots can answer questions about a portal, but they cannot reliably act
-inside one: they do not understand the controls currently visible to a user, asynchronously
-loaded pickers, validation state, or hierarchy-dependent required fields. PortalCraft AI
-closes that gap without giving a language model direct access to the DOM, databases, or
-systems of record.
+PortalCraft AI is a governed integration framework for adding portal-aware assistance to
+existing React and .NET applications. Generic copilots can describe a portal, but they do
+not automatically understand its routes, API contracts, visible workflows, authorization
+boundaries, or recent product changes. PortalCraft AI creates that missing application
+context without giving a model direct repository, database, or system-of-record access.
 
-## Four purpose-built modes
+## What PortalCraft AI provides
 
-| Mode | Responsibility |
-|---|---|
-| **UI Simulation** | Operates approved visible controls, grids, tabs, pickers, and validation flows through structured UI commands. |
-| **API Assistant** | Creates authenticated draft requests through product-owned APIs and never submits them automatically. |
-| **Query** | Answers operational and business questions through deterministic, read-only tools without requiring a model. |
-| **Access** | Explains roles, approver groups, authorization requirements, and existing access-request paths on demand. |
+- repository discovery for React routes and ASP.NET Core operations
+- safe query candidates derived only from read-only operations
+- generated React and .NET integration scaffolding in an isolated output directory
+- deterministic, typed workflows with grounded source metadata and validated navigation
+- application knowledge generated from reviewed documentation and recent commit history
+- bug-fix and enhancement summaries that can improve assistant guidance
+- regression scenarios derived from recent branch and pull-request changes
+- explicit exclusion of create, update, submit, approve, reject, delete, upload, and import
+  operations from automatic query generation
 
-## Architecture is the innovation
-
-The language model can propose only structured commands. Every command must pass server and
-client policy gates before execution. An explicit allowlist blocks submission, deletion,
-rejection, scripts, and arbitrary API calls. Consequential actions require separate human
-confirmation. Client and server privacy filters minimize sensitive page context, audit
-contracts use pseudonymous identifiers, and rate limits plus a kill switch bound the blast
-radius.
-
-The reusable core—tool registry, workflow runner, mode framework, confirmation policy,
-privacy sanitizer, and audit contracts—is separated from portal-specific routes, fields,
-APIs, and business rules. Adopting another React and .NET portal therefore means supplying
-new adapters rather than building another agent. The roadmap advances from this reusable
-portal reference implementation to a product pilot and then to a Copilot-hosted,
-cross-surface capability.
+The reusable discovery, tool, workflow, knowledge, and generation layers are separated from
+portal-specific routes, entities, APIs, and authorization rules. Adopting another portal
+therefore means reviewing generated evidence and supplying product-owned adapters rather
+than building a new assistant from scratch. Products can add UI automation, authenticated
+draft operations, access guidance, or model-backed orchestration behind their own policy
+and confirmation boundaries; those capabilities are not presented as prebuilt modes.
 
 The sample product is **Operations Hub**. It uses synthetic service requests and demonstrates:
 
