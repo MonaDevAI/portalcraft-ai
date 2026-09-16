@@ -1,6 +1,6 @@
-using ContextIq.Api.Models;
+using PortalCraft.Api.Models;
 
-namespace ContextIq.Api.Services;
+namespace PortalCraft.Api.Services;
 
 public sealed class RequestRepository
 {

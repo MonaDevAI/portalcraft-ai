@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ContextIq.RepoTool\ContextIq.RepoTool.csproj" />
+    <ProjectReference Include="..\PortalCraft.RepoTool\PortalCraft.RepoTool.csproj" />
   </ItemGroup>
 
 </Project>

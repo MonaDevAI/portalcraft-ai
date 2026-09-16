@@ -1,6 +1,6 @@
 import { ChatResponse } from "./types";
 
-export async function askContextIq(
+export async function askPortalCraft(
   message: string,
   selectedRequestId?: string,
   selectedReviewTicketId?: string
@@ -15,6 +15,6 @@ export async function askContextIq(
       selectedReviewTicketId,
     }),
   });
-  if (!response.ok) throw new Error(`Context IQ request failed (${response.status}).`);
+  if (!response.ok) throw new Error(`PortalCraft AI request failed (${response.status}).`);
   return response.json() as Promise<ChatResponse>;
 }

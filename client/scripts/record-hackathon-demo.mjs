@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const videoDirectory = path.resolve(directory, "..", "..", "video");
 const temporaryDirectory = path.join(videoDirectory, ".hackathon-recording");
-const output = path.join(videoDirectory, "Context-IQ-Hackathon-Demo.webm");
+const output = path.join(videoDirectory, "PortalCraft-AI-Hackathon-Demo.webm");
 const edge = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 
 await rm(temporaryDirectory, { recursive: true, force: true });
@@ -125,7 +125,7 @@ const showSlide = async ({ eyebrow, title, subtitle, body, accent = "#56c7ff" })
           <div class="subtitle">${subtitle}</div>
           <div class="body">${body}</div>
         </main>
-        <footer>Context IQ · Hackathon demo</footer>
+        <footer>PortalCraft AI · Hackathon demo</footer>
       </body>
     </html>
   `);
@@ -134,7 +134,7 @@ const showSlide = async ({ eyebrow, title, subtitle, body, accent = "#56c7ff" })
 await showSlide({
   eyebrow: "The challenge",
   title: "Enterprise context is scattered across screens, APIs, and repositories.",
-  subtitle: "Context IQ turns trusted product capabilities into safe, conversational workflows.",
+  subtitle: "PortalCraft AI turns trusted product capabilities into safe, conversational workflows.",
   body: `<div class="pill-row">
     <div class="pill">Grounded answers</div>
     <div class="pill">Typed tools</div>
@@ -146,9 +146,9 @@ await pause(7000);
 
 await showSlide({
   eyebrow: "Install in one command",
-  title: "Point Context IQ at an existing React and .NET repository.",
+  title: "Point PortalCraft AI at an existing React and .NET repository.",
   subtitle: "The installer scans source without executing product code and writes only to a separate output directory.",
-  body: `<div class="command">.\\scripts\\install-context-iq.ps1 \`
+  body: `<div class="command">.\\scripts\\install-portalcraft-ai.ps1 \`
   -TargetRepository C:\\path\\to\\product \`
   -Branch main \`
   -ProductName "Service Workspace" \`
@@ -158,7 +158,7 @@ await pause(9000);
 
 await page.goto("http://127.0.0.1:5173", { waitUntil: "networkidle" });
 await pause(2500);
-await page.getByRole("button", { name: "Open Context IQ" }).click();
+await page.getByRole("button", { name: "Open PortalCraft AI" }).click();
 await pause(1600);
 await page.getByRole("button", { name: "Show my recent requests" }).click();
 await pause(700);
@@ -172,7 +172,7 @@ await pause(1200);
 await selectedCard.getByRole("button", { name: "Show in requests" }).click();
 await pause(3000);
 
-const composer = page.getByLabel("Ask Context IQ");
+const composer = page.getByLabel("Ask PortalCraft AI");
 await composer.fill("List the review ticket for this request");
 await pause(700);
 await page.getByRole("button", { name: "Send" }).click();
@@ -194,10 +194,10 @@ await pause(3500);
 await showSlide({
   eyebrow: "Architecture",
   title: "A reusable shell with product-owned trust boundaries.",
-  subtitle: "Context IQ orchestrates the conversation; the product remains responsible for identity, authorization, business rules, and authoritative data.",
+  subtitle: "PortalCraft AI orchestrates the conversation; the product remains responsible for identity, authorization, business rules, and authoritative data.",
   body: `<div class="flow">
     <div class="node">React product</div><div class="arrow">→</div>
-    <div class="node">Context IQ<br>typed workflows</div><div class="arrow">→</div>
+    <div class="node">PortalCraft AI<br>typed workflows</div><div class="arrow">→</div>
     <div class="node">Authorized .NET APIs</div>
   </div>
   <div class="flow" style="margin-top:14px">

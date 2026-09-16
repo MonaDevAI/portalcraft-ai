@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const videoDirectory = path.resolve(directory, "..", "..", "video");
 const temporaryDirectory = path.join(videoDirectory, ".recording");
-const output = path.join(videoDirectory, "Context-IQ-Generic-Live-Demo.webm");
+const output = path.join(videoDirectory, "PortalCraft-AI-Generic-Live-Demo.webm");
 const edge = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 
 await rm(temporaryDirectory, { recursive: true, force: true });
@@ -25,7 +25,7 @@ const video = page.video();
 
 const pause = (milliseconds) => page.waitForTimeout(milliseconds);
 const ask = async (message) => {
-  const composer = page.getByLabel("Ask Context IQ");
+  const composer = page.getByLabel("Ask PortalCraft AI");
   await composer.fill(message);
   await pause(700);
   await page.getByRole("button", { name: "Send" }).click();
@@ -33,7 +33,7 @@ const ask = async (message) => {
 
 await page.goto("http://127.0.0.1:5173", { waitUntil: "networkidle" });
 await pause(2500);
-await page.getByRole("button", { name: "Open Context IQ" }).click();
+await page.getByRole("button", { name: "Open PortalCraft AI" }).click();
 await pause(1800);
 
 await page.getByRole("button", { name: "Show my recent requests" }).click();

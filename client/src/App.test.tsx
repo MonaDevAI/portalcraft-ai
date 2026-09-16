@@ -22,10 +22,10 @@ vi.stubGlobal("fetch", vi.fn(async () => ({
   }),
 })));
 
-test("opens Context IQ and runs a recent request query", async () => {
+test("opens PortalCraft AI and runs a recent request query", async () => {
   render(<App />);
 
-  fireEvent.click(screen.getByRole("button", { name: "Open Context IQ" }));
+  fireEvent.click(screen.getByRole("button", { name: "Open PortalCraft AI" }));
   fireEvent.click(screen.getByRole("button", { name: "Show my recent requests" }));
   fireEvent.click(screen.getByRole("button", { name: "Send" }));
 

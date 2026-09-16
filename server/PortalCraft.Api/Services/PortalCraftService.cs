@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
-using ContextIq.Api.Models;
+using PortalCraft.Api.Models;
 
-namespace ContextIq.Api.Services;
+namespace PortalCraft.Api.Services;
 
-public sealed partial class ContextIqService(RequestRepository repository)
+public sealed partial class PortalCraftService(RequestRepository repository)
 {
     public ChatResponse Respond(ChatRequest request)
     {
@@ -12,7 +12,7 @@ public sealed partial class ContextIqService(RequestRepository repository)
         if (ContainsMutation(message))
         {
             return Response(
-                "Context IQ is read-only in this sample. Use the product's governed controls for state-changing actions.");
+                "PortalCraft AI is read-only in this sample. Use the product's governed controls for state-changing actions.");
         }
 
         var requestId = RequestIdPattern().Match(message);

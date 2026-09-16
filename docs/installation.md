@@ -1,6 +1,6 @@
 # Installation and repository onboarding
 
-Context IQ can be used as a reference application, a local .NET tool, or a
+PortalCraft AI can be used as a reference application, a local .NET tool, or a
 repository-scaffolding step.
 
 ## Prerequisites
@@ -13,9 +13,9 @@ repository-scaffolding step.
 ## 1. Clone and validate
 
 ```powershell
-git clone https://github.com/MonaDevAI/context-iq.git
-cd context-iq
-dotnet test server\ContextIq.sln
+git clone https://github.com/MonaDevAI/portalcraft-ai.git
+cd portalcraft-ai
+dotnet test server\PortalCraft.sln
 
 cd client
 npm install
@@ -29,7 +29,7 @@ cd ..
 Use two terminals:
 
 ```powershell
-dotnet run --project server\ContextIq.Api
+dotnet run --project server\PortalCraft.Api
 ```
 
 ```powershell
@@ -55,14 +55,14 @@ Restart or rebuild the client after changing these values.
 Analysis does not write to the target repository:
 
 ```powershell
-dotnet run --project tools\ContextIq.RepoTool -- analyze C:\path\to\product
+dotnet run --project tools\PortalCraft.RepoTool -- analyze C:\path\to\product
 ```
 
 ## 5. Generate integration scaffolding
 
 ```powershell
-dotnet run --project tools\ContextIq.RepoTool -- generate C:\path\to\product `
-  --output C:\path\to\product\.context-iq
+dotnet run --project tools\PortalCraft.RepoTool -- generate C:\path\to\product `
+  --output C:\path\to\product\.portalcraft-ai
 ```
 
 Review the generated manifest before copying the React and .NET files into the
@@ -72,9 +72,9 @@ in product-owned backend code.
 ## 6. Generate recent-branch test scenarios
 
 ```powershell
-dotnet run --project tools\ContextIq.RepoTool -- pr-scenarios C:\path\to\product `
+dotnet run --project tools\PortalCraft.RepoTool -- pr-scenarios C:\path\to\product `
   --branch main --since-days 30 `
-  --output C:\path\to\product\.context-iq\pr-scenarios
+  --output C:\path\to\product\.portalcraft-ai\pr-scenarios
 ```
 
 Use `develop` instead of `main` when that is the product's integration branch.
@@ -84,20 +84,20 @@ Use `develop` instead of `main` when that is the product's integration branch.
 The installation helper runs generation and branch analysis together:
 
 ```powershell
-.\scripts\install-context-iq.ps1 `
+.\scripts\install-portalcraft-ai.ps1 `
   -TargetRepository C:\path\to\product `
   -Branch main `
   -ProductName "Service Workspace" `
   -AssistantName "Workspace Assistant"
 ```
 
-It writes only under the target repository's `.context-iq` directory. Existing
+It writes only under the target repository's `.portalcraft-ai` directory. Existing
 non-empty output is protected unless `-Force` is explicitly supplied.
 
 ## Preview the generated dashboard
 
 ```powershell
-dotnet run --project tools\ContextIq.RepoTool -- serve C:\path\to\product\.context-iq
+dotnet run --project tools\PortalCraft.RepoTool -- serve C:\path\to\product\.portalcraft-ai
 ```
 
 Open `http://127.0.0.1:4318`. The dashboard shows discovered API operations,

@@ -13,6 +13,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ContextIq.Api\ContextIq.Api.csproj" />
+    <ProjectReference Include="..\PortalCraft.Api\PortalCraft.Api.csproj" />
   </ItemGroup>
 </Project>

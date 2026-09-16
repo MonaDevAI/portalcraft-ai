@@ -1,4 +1,4 @@
-namespace ContextIq.RepoTool;
+namespace PortalCraft.RepoTool;
 
 public sealed record ApiOperation(
     string Id,

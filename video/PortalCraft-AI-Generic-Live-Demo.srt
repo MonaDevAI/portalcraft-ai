@@ -1,6 +1,6 @@
 1
 00:00:00,000 --> 00:00:04,500
-Context IQ is a reusable React and .NET assistant.
+PortalCraft AI is a reusable React and .NET assistant.
 
 2
 00:00:04,500 --> 00:00:11,000

@@ -1,11 +1,11 @@
-using ContextIq.RepoTool;
+using PortalCraft.RepoTool;
 
-namespace ContextIq.RepoTool.Tests;
+namespace PortalCraft.RepoTool.Tests;
 
 public sealed class RepositoryScannerTests : IDisposable
 {
     private readonly string directory =
-        Path.Combine(Path.GetTempPath(), $"context-iq-repo-tool-{Guid.NewGuid():N}");
+        Path.Combine(Path.GetTempPath(), $"portalcraft-ai-repo-tool-{Guid.NewGuid():N}");
 
     [Fact]
     public void DiscoversReadOnlyApisRoutesAndQueries()
@@ -81,15 +81,15 @@ public sealed class RepositoryScannerTests : IDisposable
         var result = new IntegrationGenerator().Generate(profile, output);
 
         Assert.Equal(6, result.Files.Count);
-        Assert.True(File.Exists(Path.Combine(output, "context-iq.manifest.json")));
+        Assert.True(File.Exists(Path.Combine(output, "portalcraft-ai.manifest.json")));
         Assert.Contains(
-            "MapContextIqGeneratedCatalog",
-            File.ReadAllText(Path.Combine(output, "server", "ContextIqGeneratedCatalog.cs")));
+            "MapPortalCraftGeneratedCatalog",
+            File.ReadAllText(Path.Combine(output, "server", "PortalCraftGeneratedCatalog.cs")));
         Assert.Contains(
-            "ContextIqGeneratedPanel",
-            File.ReadAllText(Path.Combine(output, "client", "ContextIqGeneratedPanel.tsx")));
+            "PortalCraftGeneratedPanel",
+            File.ReadAllText(Path.Combine(output, "client", "PortalCraftGeneratedPanel.tsx")));
         Assert.Contains(
-            "Context IQ repository dashboard",
+            "PortalCraft AI repository dashboard",
             File.ReadAllText(Path.Combine(output, "dashboard", "index.html")));
     }
 

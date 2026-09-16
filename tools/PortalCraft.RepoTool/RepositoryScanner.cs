@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace ContextIq.RepoTool;
+namespace PortalCraft.RepoTool;
 
 public sealed partial class RepositoryScanner
 {
@@ -10,7 +10,7 @@ public sealed partial class RepositoryScanner
     private static readonly HashSet<string> ExcludedDirectories =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ".git", ".context-iq", "bin", "obj", "node_modules", "dist", "build",
+            ".git", ".portalcraft-ai", "bin", "obj", "node_modules", "dist", "build",
             "coverage", ".next", "artifacts", "test", "tests", "tools"
         };
 

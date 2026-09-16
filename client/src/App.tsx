@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ContextIq } from "./ContextIq";
+import { PortalCraft } from "./PortalCraft";
 import { productName } from "./config";
 import { RequestRecord } from "./types";
 import "./styles.css";
@@ -30,7 +30,7 @@ export default function App() {
         </nav>
         <main>
           <h1>{view === "reviewQueue" ? "Review queue" : view[0].toUpperCase() + view.slice(1)}</h1>
-          <p className="subtitle">Synthetic data for the standalone Context IQ reference application.</p>
+          <p className="subtitle">Synthetic data for the standalone PortalCraft AI reference application.</p>
           {view === "dashboard" && (
             <section className="metrics">
               <div><span>Open requests</span><strong>14</strong><small>Across all teams</small></div>
@@ -42,7 +42,7 @@ export default function App() {
             <section className="table-card">
               <h2>{view === "requests" ? "Request search results" : "Requests awaiting validation"}</h2>
               {visibleRequests.length === 0 ? (
-                <p>Use Context IQ to locate a request.</p>
+                <p>Use PortalCraft AI to locate a request.</p>
               ) : (
                 <table>
                   <thead>
@@ -67,7 +67,7 @@ export default function App() {
           )}
         </main>
       </div>
-      <ContextIq onOpenView={(nextView, requests) => {
+      <PortalCraft onOpenView={(nextView, requests) => {
         setView(nextView);
         setVisibleRequests(requests);
       }} />

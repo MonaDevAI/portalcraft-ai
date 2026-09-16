@@ -2,7 +2,7 @@
 
 This journey uses illustrative identifiers and read-only actions.
 
-The default installation uses **Context IQ**. A deployment can set
+The default installation uses **PortalCraft AI**. A deployment can set
 `VITE_ASSISTANT_NAME=Workspace Assistant` or another product-owned name without
 changing the reusable workflows.
 

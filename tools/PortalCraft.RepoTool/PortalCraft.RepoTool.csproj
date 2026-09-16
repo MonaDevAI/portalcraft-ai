@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>context-iq-repo</ToolCommandName>
+    <ToolCommandName>portalcraft-ai-repo</ToolCommandName>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>

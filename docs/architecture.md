@@ -3,7 +3,7 @@
 ```mermaid
 flowchart LR
     U[Business user] --> R[React product]
-    R --> C[Context IQ shell]
+    R --> C[PortalCraft AI shell]
     C --> T[Typed tools and workflows]
     T --> A[Authorized .NET APIs]
     A --> P[Product data provider]
@@ -44,7 +44,7 @@ The included `RequestRepository` is an in-memory provider. Replace it with an in
 
 ## Repository onboarding tool
 
-`ContextIq.RepoTool` provides a safe starting point for a new product:
+`PortalCraft.RepoTool` provides a safe starting point for a new product:
 
 1. It scans source files without executing repository code.
 2. It inventories ASP.NET Core minimal APIs, controller actions, frontend API calls, and React routes.
@@ -68,9 +68,9 @@ execution belongs in the product's established unit, integration, API, and Playw
 | Layer | Responsibility |
 |---|---|
 | React application | Current route, visible entity context, conversation UI, confirmations, and validated navigation |
-| Context IQ | Intent routing, typed tool selection, workflow continuity, response formatting, and source presentation |
+| PortalCraft AI | Intent routing, typed tool selection, workflow continuity, response formatting, and source presentation |
 | .NET API | Authentication, authorization, business rules, data access, auditing, and stable contracts |
-| Product provider | Maps product-specific APIs and records into Context IQ contracts |
+| Product provider | Maps product-specific APIs and records into PortalCraft AI contracts |
 | Systems of record | Authoritative business data and workflow state |
 
 ## Safety model

@@ -1,4 +1,4 @@
-namespace ContextIq.Api.Models;
+namespace PortalCraft.Api.Models;
 
 public sealed record RequestRecord(
     string RequestId,

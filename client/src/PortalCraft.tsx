@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { askContextIq } from "./api";
+import { askPortalCraft } from "./api";
 import { assistantName, productName } from "./config";
 import { ChatMessage, RequestRecord } from "./types";
 
@@ -14,7 +14,7 @@ const prompts = [
   "Show review ticket REV-8398 in the review queue",
 ];
 
-export function ContextIq({ onOpenView }: Props) {
+export function PortalCraft({ onOpenView }: Props) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [running, setRunning] = useState(false);
@@ -43,7 +43,7 @@ export function ContextIq({ onOpenView }: Props) {
     setRunning(true);
     setMessages(current => [...current, { role: "user", text: message }]);
     try {
-      const response = await askContextIq(message, selectedRequestId, selectedReviewTicketId);
+      const response = await askPortalCraft(message, selectedRequestId, selectedReviewTicketId);
       setSelectedRequestId(response.selectedRequestId || selectedRequestId);
       setSelectedReviewTicketId(response.selectedReviewTicketId || selectedReviewTicketId);
       setMessages(current => [...current, { role: "assistant", text: response.message, response }]);
@@ -70,9 +70,9 @@ export function ContextIq({ onOpenView }: Props) {
             <strong>{assistantName}</strong>
             <span>Grounded assistance for {productName}</span>
           </div>
-          <button className="close" aria-label="Close Context IQ" onClick={() => setOpen(false)}>×</button>
+          <button className="close" aria-label="Close PortalCraft AI" onClick={() => setOpen(false)}>×</button>
         </header>
-        <nav className="mode-tabs" aria-label="Context IQ modes">
+        <nav className="mode-tabs" aria-label="PortalCraft AI modes">
           <button>UI</button>
           <button className="active">Query</button>
           <button>Security</button>

@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace ContextIq.RepoTool;
+namespace PortalCraft.RepoTool;
 
 public static class DashboardServer
 {
@@ -22,7 +22,7 @@ public static class DashboardServer
         var html = File.ReadAllBytes(dashboard);
         using var listener = new TcpListener(IPAddress.Loopback, port);
         listener.Start();
-        Console.WriteLine($"Context IQ dashboard: http://127.0.0.1:{port}");
+        Console.WriteLine($"PortalCraft AI dashboard: http://127.0.0.1:{port}");
         Console.WriteLine("Press Ctrl+C to stop.");
 
         while (true)

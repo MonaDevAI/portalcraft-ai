@@ -1,10 +1,10 @@
-using ContextIq.Api.Models;
-using ContextIq.Api.Services;
+using PortalCraft.Api.Models;
+using PortalCraft.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<RequestRepository>();
-builder.Services.AddSingleton<ContextIqService>();
+builder.Services.AddSingleton<PortalCraftService>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
@@ -37,7 +37,7 @@ app.MapGet("/api/requests/{requestId}", (RequestRepository repository, string re
 app.MapGet("/api/review-queue", (RequestRepository repository, string? reviewTicketId) =>
     Results.Ok(repository.ReviewQueue(reviewTicketId)));
 
-app.MapPost("/api/chat", (ChatRequest request, ContextIqService service) =>
+app.MapPost("/api/chat", (ChatRequest request, PortalCraftService service) =>
     Results.Ok(service.Respond(request)));
 
 app.Run("http://localhost:5080");

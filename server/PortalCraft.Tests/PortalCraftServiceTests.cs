@@ -1,12 +1,12 @@
-using ContextIq.Api.Models;
-using ContextIq.Api.Services;
+using PortalCraft.Api.Models;
+using PortalCraft.Api.Services;
 using Xunit;
 
-namespace ContextIq.Tests;
+namespace PortalCraft.Tests;
 
-public sealed class ContextIqServiceTests
+public sealed class PortalCraftServiceTests
 {
-    private readonly ContextIqService service = new(new RequestRepository());
+    private readonly PortalCraftService service = new(new RequestRepository());
 
     [Fact]
     public void FindsCurrentUsersRecentRequests()

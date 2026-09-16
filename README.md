@@ -1,6 +1,6 @@
-# Context IQ
+# PortalCraft AI
 
-Context IQ is a complete, generic reference implementation of governed conversational assistance for a React application backed by a .NET API.
+PortalCraft AI is a complete, generic reference implementation of governed conversational assistance for a React application backed by a .NET API.
 
 The sample product is **Operations Hub**. It uses synthetic service requests and demonstrates:
 
@@ -18,33 +18,33 @@ No product source, internal URLs, credentials, or production data are included.
 
 ```text
 client/                 React + TypeScript application
-server/ContextIq.Api/   ASP.NET Core API
-server/ContextIq.Tests/ xUnit tests
+server/PortalCraft.Api/   ASP.NET Core API
+server/PortalCraft.Tests/ xUnit tests
 docs/                   architecture and demo script
 video/                  product-neutral demo and captions
 scripts/                local startup helpers
-tools/ContextIq.RepoTool/ repository discovery and integration generator
+tools/PortalCraft.RepoTool/ repository discovery and integration generator
 ```
 
 ## Onboard another repository
 
 The repository tool scans React/JavaScript and ASP.NET Core source, inventories UI routes
-and API operations, proposes read-only Context IQ queries, and generates separate React
+and API operations, proposes read-only PortalCraft AI queries, and generates separate React
 and .NET integration scaffolding:
 
 ```powershell
-dotnet run --project tools\ContextIq.RepoTool -- analyze C:\path\to\product
+dotnet run --project tools\PortalCraft.RepoTool -- analyze C:\path\to\product
 
-dotnet run --project tools\ContextIq.RepoTool -- generate C:\path\to\product `
-  --output C:\path\to\product\.context-iq
+dotnet run --project tools\PortalCraft.RepoTool -- generate C:\path\to\product `
+  --output C:\path\to\product\.portalcraft-ai
 ```
 
 Generated output includes:
 
-- `context-iq.manifest.json` with discovered evidence and query candidates
-- `server\ContextIqGeneratedCatalog.cs` with a typed catalog API
-- `client\contextIq.generated.ts` with typed query descriptors
-- `client\ContextIqGeneratedPanel.tsx` with reusable prompt UI
+- `portalcraft-ai.manifest.json` with discovered evidence and query candidates
+- `server\PortalCraftGeneratedCatalog.cs` with a typed catalog API
+- `client\portalCraft.generated.ts` with typed query descriptors
+- `client\PortalCraftGeneratedPanel.tsx` with reusable prompt UI
 - `dashboard\index.html` with an immediately runnable repository dashboard
 - integration instructions and safety checks
 
@@ -57,9 +57,9 @@ directory unless `--force` is supplied.
 The tool can also be packed and installed:
 
 ```powershell
-dotnet pack tools\ContextIq.RepoTool -c Release
-dotnet tool install --global --add-source tools\ContextIq.RepoTool\bin\Release ContextIq.RepoTool
-context-iq-repo analyze C:\path\to\product
+dotnet pack tools\PortalCraft.RepoTool -c Release
+dotnet tool install --global --add-source tools\PortalCraft.RepoTool\bin\Release PortalCraft.RepoTool
+portalcraft-ai-repo analyze C:\path\to\product
 ```
 
 For end-to-end setup, branding, generation, and integration checks, see
@@ -67,7 +67,7 @@ For end-to-end setup, branding, generation, and integration checks, see
 PowerShell helper is also available:
 
 ```powershell
-.\scripts\install-context-iq.ps1 `
+.\scripts\install-portalcraft-ai.ps1 `
   -TargetRepository C:\path\to\product `
   -Branch main `
   -ProductName "Service Workspace" `
@@ -77,7 +77,7 @@ PowerShell helper is also available:
 Then preview the generated repository dashboard:
 
 ```powershell
-dotnet run --project tools\ContextIq.RepoTool -- serve C:\path\to\product\.context-iq
+dotnet run --project tools\PortalCraft.RepoTool -- serve C:\path\to\product\.portalcraft-ai
 ```
 
 Open `http://127.0.0.1:4318`.
@@ -88,9 +88,9 @@ The tool can inspect first-parent history on `develop`, `main`, or an explicitly
 branch and derive test scenarios from the changed UI, API, security, data, and test surfaces:
 
 ```powershell
-dotnet run --project tools\ContextIq.RepoTool -- pr-scenarios C:\path\to\product `
+dotnet run --project tools\PortalCraft.RepoTool -- pr-scenarios C:\path\to\product `
   --branch develop --since-days 30 --limit 50 `
-  --output C:\path\to\product\.context-iq\pr-scenarios
+  --output C:\path\to\product\.portalcraft-ai\pr-scenarios
 ```
 
 It writes both `pr-test-scenarios.json` and `pr-test-scenarios.md`. Merge commits and
@@ -107,7 +107,7 @@ Requirements:
 From two terminals:
 
 ```powershell
-dotnet run --project server\ContextIq.Api
+dotnet run --project server\PortalCraft.Api
 ```
 
 ```powershell
@@ -133,13 +133,13 @@ VITE_PRODUCT_NAME=Service Workspace
 VITE_ASSISTANT_NAME=Workspace Assistant
 ```
 
-The defaults remain `Operations Hub` and `Context IQ`. These values are compiled into the
+The defaults remain `Operations Hub` and `PortalCraft AI`. These values are compiled into the
 frontend, so restart the development server or rebuild after changing them.
 
 ## Validate
 
 ```powershell
-dotnet test server\ContextIq.sln
+dotnet test server\PortalCraft.sln
 
 cd client
 npm install
@@ -159,9 +159,9 @@ npm run build
 
 ## Demo
 
-- [Hackathon installation, live workflow, and architecture demo](video/Context-IQ-Hackathon-Demo.mp4)
-- [Hackathon demo captions](video/Context-IQ-Hackathon-Demo.srt)
-- [Live generic Context IQ demo](video/Context-IQ-Generic-Live-Demo.mp4)
-- [English captions](video/Context-IQ-Generic-Live-Demo.srt)
+- [Hackathon installation, live workflow, and architecture demo](video/PortalCraft-AI-Hackathon-Demo.mp4)
+- [Hackathon demo captions](video/PortalCraft-AI-Hackathon-Demo.srt)
+- [Live generic PortalCraft AI demo](video/PortalCraft-AI-Generic-Live-Demo.mp4)
+- [English captions](video/PortalCraft-AI-Generic-Live-Demo.srt)
 - [Demo script](docs/demo-script.md)
 - [Architecture](docs/architecture.md)

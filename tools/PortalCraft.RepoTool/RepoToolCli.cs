@@ -1,4 +1,4 @@
-namespace ContextIq.RepoTool;
+namespace PortalCraft.RepoTool;
 
 public static class RepoToolCli
 {
@@ -48,7 +48,7 @@ public static class RepoToolCli
             var analyzer = new PullRequestScenarioAnalyzer();
             var report = analyzer.Analyze(repository, branch, sinceDays, limit);
             var scenarioOutput = GetOption(args, "--output")
-                ?? Path.Combine(repository, ".context-iq", "pr-scenarios");
+                ?? Path.Combine(repository, ".portalcraft-ai", "pr-scenarios");
             var files = analyzer.Write(
                 report,
                 scenarioOutput,
@@ -72,7 +72,7 @@ public static class RepoToolCli
         }
 
         var output = GetOption(args, "--output")
-            ?? Path.Combine(repository, ".context-iq");
+            ?? Path.Combine(repository, ".portalcraft-ai");
         var result = new IntegrationGenerator().Generate(
             profile,
             output,
@@ -133,7 +133,7 @@ public static class RepoToolCli
     private static void PrintUsage() =>
         Console.WriteLine(
             """
-            ContextIq.RepoTool
+            PortalCraft.RepoTool
 
               analyze  <repository>                          Inspect without writing files.
               generate <repository> [--output <dir>] [--force]
