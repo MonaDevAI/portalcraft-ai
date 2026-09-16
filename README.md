@@ -1,5 +1,7 @@
 # PortalCraft AI
 
+![PortalCraft AI logo](assets/portalcraft-ai-logo.svg)
+
 PortalCraft AI is a complete, generic reference implementation of governed conversational assistance for a React application backed by a .NET API.
 
 The sample product is **Operations Hub**. It uses synthetic service requests and demonstrates:
@@ -159,8 +161,6 @@ npm run build
 
 ## Demo
 
-- [Hackathon installation, live workflow, and architecture demo](video/PortalCraft-AI-Hackathon-Demo.mp4)
-- [Hackathon demo captions](video/PortalCraft-AI-Hackathon-Demo.srt)
 - [Live generic PortalCraft AI demo](video/PortalCraft-AI-Generic-Live-Demo.mp4)
 - [English captions](video/PortalCraft-AI-Generic-Live-Demo.srt)
 - [Demo script](docs/demo-script.md)
