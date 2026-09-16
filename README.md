@@ -2,7 +2,37 @@
 
 ![PortalCraft AI logo](assets/portalcraft-ai-logo.svg)
 
-PortalCraft AI is a complete, generic reference implementation of governed conversational assistance for a React application backed by a .NET API.
+PortalCraft AI is a governed agent framework for safely assisting users inside enterprise
+portals. Generic copilots can answer questions about a portal, but they cannot reliably act
+inside one: they do not understand the controls currently visible to a user, asynchronously
+loaded pickers, validation state, or hierarchy-dependent required fields. PortalCraft AI
+closes that gap without giving a language model direct access to the DOM, databases, or
+systems of record.
+
+## Four purpose-built modes
+
+| Mode | Responsibility |
+|---|---|
+| **UI Simulation** | Operates approved visible controls, grids, tabs, pickers, and validation flows through structured UI commands. |
+| **API Assistant** | Creates authenticated draft requests through product-owned APIs and never submits them automatically. |
+| **Query** | Answers operational and business questions through deterministic, read-only tools without requiring a model. |
+| **Access** | Explains roles, approver groups, authorization requirements, and existing access-request paths on demand. |
+
+## Architecture is the innovation
+
+The language model can propose only structured commands. Every command must pass server and
+client policy gates before execution. An explicit allowlist blocks submission, deletion,
+rejection, scripts, and arbitrary API calls. Consequential actions require separate human
+confirmation. Client and server privacy filters minimize sensitive page context, audit
+contracts use pseudonymous identifiers, and rate limits plus a kill switch bound the blast
+radius.
+
+The reusable core—tool registry, workflow runner, mode framework, confirmation policy,
+privacy sanitizer, and audit contracts—is separated from portal-specific routes, fields,
+APIs, and business rules. Adopting another React and .NET portal therefore means supplying
+new adapters rather than building another agent. The roadmap advances from this reusable
+portal reference implementation to a product pilot and then to a Copilot-hosted,
+cross-surface capability.
 
 The sample product is **Operations Hub**. It uses synthetic service requests and demonstrates:
 
@@ -98,6 +128,23 @@ dotnet run --project tools\PortalCraft.RepoTool -- pr-scenarios C:\path\to\produ
 It writes both `pr-test-scenarios.json` and `pr-test-scenarios.md`. Merge commits and
 squash commits with PR numbers are labeled as PRs; other first-parent commits are retained
 as commit-level fallbacks so recent behavior is not silently omitted.
+
+### Generate application and change knowledge
+
+PortalCraft AI can turn reviewed repository documentation and recent branch history into
+a build-time knowledge package for an adopting assistant:
+
+```powershell
+dotnet run --project tools\PortalCraft.RepoTool -- knowledge C:\path\to\product `
+  --branch develop --since-days 180 --limit 100 `
+  --output C:\path\to\product\.portalcraft-ai\knowledge
+```
+
+The command writes JSON, Markdown, and a typed TypeScript module containing documentation
+summaries plus categorized bug fixes, enhancements, security changes, and other commits.
+It reads repository files and Git history without executing product code. Teams must review
+the generated package before integration and continue to use authorized product APIs for
+live business data.
 
 ## Run locally
 

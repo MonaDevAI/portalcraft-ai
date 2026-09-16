@@ -24,7 +24,7 @@ public static class RepoToolCli
         }
 
         var command = args[0].ToLowerInvariant();
-        if (command is not ("analyze" or "generate" or "pr-scenarios" or "serve"))
+        if (command is not ("analyze" or "generate" or "knowledge" or "pr-scenarios" or "serve"))
         {
             throw new ArgumentException($"Unknown command '{args[0]}'.");
         }
@@ -58,6 +58,33 @@ public static class RepoToolCli
             Console.WriteLine($"Test scenarios: {report.Scenarios.Count}");
             Console.WriteLine($"Generated {files.Count} files in {Path.GetFullPath(scenarioOutput)}");
             foreach (var warning in report.Warnings)
+            {
+                Console.WriteLine($"warning: {warning}");
+            }
+            return 0;
+        }
+
+        if (command == "knowledge")
+        {
+            var branch = GetOption(args, "--branch");
+            var sinceDays = GetIntOption(args, "--since-days", 180);
+            var limit = GetIntOption(args, "--limit", 100);
+            var knowledge = new RepositoryKnowledgeBuilder().Build(
+                repository,
+                branch,
+                sinceDays,
+                limit);
+            var knowledgeOutput = GetOption(args, "--output")
+                ?? Path.Combine(repository, ".portalcraft-ai", "knowledge");
+            var files = new RepositoryKnowledgeBuilder().Write(
+                knowledge,
+                knowledgeOutput,
+                args.Contains("--force", StringComparer.OrdinalIgnoreCase));
+            Console.WriteLine($"Branch: {knowledge.Branch}");
+            Console.WriteLine($"Documentation sources: {knowledge.Documents.Count}");
+            Console.WriteLine($"Recent changes: {knowledge.Changes.Count}");
+            Console.WriteLine($"Generated {files.Count} files in {Path.GetFullPath(knowledgeOutput)}");
+            foreach (var warning in knowledge.Warnings)
             {
                 Console.WriteLine($"warning: {warning}");
             }
@@ -141,6 +168,9 @@ public static class RepoToolCli
               pr-scenarios <repository> [--branch <name>] [--since-days <n>]
                            [--limit <n>] [--output <dir>] [--force]
                                                                Derive test scenarios from recent branch changes.
+              knowledge <repository> [--branch <name>] [--since-days <n>]
+                        [--limit <n>] [--output <dir>] [--force]
+                                                               Generate reviewed app-documentation and change knowledge.
               serve <generated-directory> [--port <n>]          Run the generated repository dashboard.
 
             Only discovered GET operations become automatic query candidates.

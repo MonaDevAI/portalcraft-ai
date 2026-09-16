@@ -137,6 +137,34 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains(scenarios, scenario => scenario.Category == "regression");
     }
 
+    [Fact]
+    public void BuildsDocumentationAndClassifiesRepositoryKnowledge()
+    {
+        Write(
+            "README.md",
+            """
+            # Sample portal
+
+            The portal manages governed requests and approval workflows.
+            """);
+        Write(
+            "docs/architecture.md",
+            """
+            # Architecture
+
+            React calls authorized .NET APIs for trusted product data.
+            """);
+
+        var documents = RepositoryKnowledgeBuilder.ReadDocumentation(directory);
+
+        Assert.Equal(2, documents.Count);
+        Assert.Equal("Sample portal", documents[0].Title);
+        Assert.Contains("approval workflows", documents[0].Summary);
+        Assert.Equal("bugFix", RepositoryKnowledgeBuilder.ClassifyChange("Fix request status"));
+        Assert.Equal("enhancement", RepositoryKnowledgeBuilder.ClassifyChange("Add request search"));
+        Assert.Equal("security", RepositoryKnowledgeBuilder.ClassifyChange("Enforce role access"));
+    }
+
     private void Write(string relativePath, string content)
     {
         var path = Path.Combine(directory, relativePath.Replace('/', Path.DirectorySeparatorChar));

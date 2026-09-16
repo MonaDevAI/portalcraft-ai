@@ -53,3 +53,24 @@ public sealed record PullRequestScenarioReport(
     IReadOnlyList<PullRequestChange> Changes,
     IReadOnlyList<TestScenario> Scenarios,
     IReadOnlyList<string> Warnings);
+
+public sealed record RepositoryDocument(
+    string Path,
+    string Title,
+    string Summary);
+
+public sealed record RepositoryChangeInsight(
+    string Commit,
+    string? PullRequestNumber,
+    string Category,
+    string Title,
+    DateTimeOffset ChangedAt,
+    IReadOnlyList<string> ChangedFiles);
+
+public sealed record RepositoryKnowledge(
+    string Repository,
+    string Branch,
+    DateTimeOffset GeneratedAt,
+    IReadOnlyList<RepositoryDocument> Documents,
+    IReadOnlyList<RepositoryChangeInsight> Changes,
+    IReadOnlyList<string> Warnings);

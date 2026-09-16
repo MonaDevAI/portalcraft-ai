@@ -8,6 +8,7 @@ first-parent branch history.
 portalcraft-ai-repo analyze C:\path\to\product
 portalcraft-ai-repo generate C:\path\to\product --output C:\path\to\product\.portalcraft-ai
 portalcraft-ai-repo pr-scenarios C:\path\to\product --branch main --since-days 30
+portalcraft-ai-repo knowledge C:\path\to\product --branch main --since-days 180
 portalcraft-ai-repo serve C:\path\to\product\.portalcraft-ai
 ```
 
