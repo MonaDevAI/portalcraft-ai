@@ -132,6 +132,7 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains("\"validator\"", generated);
         Assert.Contains("findPortalCraftAssistantView", generated);
         Assert.Contains("buildPortalCraftAssistantRoute", generated);
+        Assert.DoesNotContain("for (const", generated);
     }
 
     [Fact]

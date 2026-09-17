@@ -179,15 +179,12 @@ public sealed class IntegrationGenerator
         ): string | undefined {
           const path = findPortalCraftAssistantView(requiredTags);
           if (!path || !path.startsWith("/") || path.startsWith("//")) return undefined;
-          const query = new URLSearchParams();
-          for (const [name, rawValue] of Object.entries(parameters)) {
-            const value = rawValue.trim();
-            if (!SAFE_PARAMETER_NAME.test(name) || !isSafeParameterValue(value)) {
-              return undefined;
-            }
-            query.set(name, value);
-          }
-          const suffix = query.toString();
+          const entries: Array<[string, string]> = Object.entries(parameters)
+            .map(([name, value]) => [name, value.trim()]);
+          if (!entries.every(
+            ([name, value]) => SAFE_PARAMETER_NAME.test(name) && isSafeParameterValue(value)
+          )) return undefined;
+          const suffix = new URLSearchParams(entries).toString();
           return suffix ? `${path}?${suffix}` : path;
         }
         """;
