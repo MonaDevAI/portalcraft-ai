@@ -143,6 +143,15 @@ summaries plus categorized bug fixes, enhancements, security changes, and other 
 Repeat `--manuals-path` to restrict documentation ingestion to approved repository-relative
 manual files or directories. When omitted, PortalCraft retains its repository-wide Markdown
 discovery behavior. Paths outside the repository and non-Markdown manual files are rejected.
+Manuals may declare an approved external source link in YAML front matter:
+
+```markdown
+---
+sourceUrl: https://contoso.sharepoint.com/sites/product/manual
+---
+```
+
+Only absolute HTTPS links are retained in generated knowledge and invalid links fail generation.
 It reads repository files and Git history without executing product code. Teams must review
 the generated package before integration and continue to use authorized product APIs for
 live business data.

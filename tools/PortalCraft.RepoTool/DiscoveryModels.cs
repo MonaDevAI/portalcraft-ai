@@ -57,7 +57,8 @@ public sealed record PullRequestScenarioReport(
 public sealed record RepositoryDocument(
     string Path,
     string Title,
-    string Summary);
+    string Summary,
+    string? SourceUrl);
 
 public sealed record RepositoryChangeInsight(
     string Commit,
