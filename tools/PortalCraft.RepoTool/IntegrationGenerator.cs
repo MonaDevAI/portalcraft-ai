@@ -167,7 +167,9 @@ public sealed class IntegrationGenerator
             .map(tag => tag.trim().toLowerCase())
             .filter(Boolean);
           return portalCraftAssistantViews
-            .filter(view => normalizedTags.every(tag => view.tags.includes(tag)))
+            .filter(view => normalizedTags.every(
+              tag => (view.tags as readonly string[]).includes(tag)
+            ))
             .sort((left, right) => left.path.length - right.path.length)[0]?.path;
         }
 
