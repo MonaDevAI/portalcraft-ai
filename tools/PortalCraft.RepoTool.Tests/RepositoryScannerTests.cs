@@ -80,7 +80,7 @@ public sealed class RepositoryScannerTests : IDisposable
 
         var result = new IntegrationGenerator().Generate(profile, output);
 
-        Assert.Equal(6, result.Files.Count);
+        Assert.Equal(7, result.Files.Count);
         Assert.True(File.Exists(Path.Combine(output, "portalcraft-ai.manifest.json")));
         Assert.Contains(
             "MapPortalCraftGeneratedCatalog",
@@ -89,8 +89,49 @@ public sealed class RepositoryScannerTests : IDisposable
             "PortalCraftGeneratedPanel",
             File.ReadAllText(Path.Combine(output, "client", "PortalCraftGeneratedPanel.tsx")));
         Assert.Contains(
+            "buildPortalCraftAssistantRoute",
+            File.ReadAllText(Path.Combine(output, "client", "portalCraftAssistant.generated.ts")));
+        Assert.Contains(
             "PortalCraft AI repository dashboard",
             File.ReadAllText(Path.Combine(output, "dashboard", "index.html")));
+    }
+
+    [Fact]
+    public void GeneratesAssistantRoutesFromDiscoveredPortalViews()
+    {
+        Write(
+            "Program.cs",
+            """
+            app.MapPost("/api/product-hierarchy/requests/search", () => Results.Ok());
+            """);
+        Write(
+            "routes.tsx",
+            """
+            export const routes = [
+              { path: "/search-product-hierarchy-requests" },
+              { path: "/product-hierarchy-validator-queue" }
+            ];
+            """);
+        Write(
+            "enums.ts",
+            """
+            export enum RequestTypeURL {
+              SearchProductHierarchy = "search-product-hierarchy",
+              ProductHierarchyValidatorQueue = "product-hierarchy-validator-queue"
+            }
+            """);
+        var profile = new RepositoryScanner().Scan(directory);
+        var output = Path.Combine(directory, "portalCraftAssistant.generated.ts");
+
+        new IntegrationGenerator().GenerateAssistantIntegration(profile, output);
+
+        var generated = File.ReadAllText(output);
+        Assert.Contains("/search-product-hierarchy-requests", generated);
+        Assert.Contains("/search-product-hierarchy", generated);
+        Assert.Contains("/product-hierarchy-validator-queue", generated);
+        Assert.Contains("\"validator\"", generated);
+        Assert.Contains("findPortalCraftAssistantView", generated);
+        Assert.Contains("buildPortalCraftAssistantRoute", generated);
     }
 
     [Fact]

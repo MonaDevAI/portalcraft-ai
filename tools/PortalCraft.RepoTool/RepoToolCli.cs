@@ -24,7 +24,7 @@ public static class RepoToolCli
         }
 
         var command = args[0].ToLowerInvariant();
-        if (command is not ("analyze" or "generate" or "knowledge" or "pr-scenarios" or "serve"))
+        if (command is not ("analyze" or "generate" or "assistant" or "knowledge" or "pr-scenarios" or "serve"))
         {
             throw new ArgumentException($"Unknown command '{args[0]}'.");
         }
@@ -98,6 +98,19 @@ public static class RepoToolCli
             return 0;
         }
 
+        if (command == "assistant")
+        {
+            var outputFile = GetOption(args, "--output")
+                ?? Path.Combine(repository, ".portalcraft-ai", "client", "portalCraftAssistant.generated.ts");
+            var file = new IntegrationGenerator().GenerateAssistantIntegration(
+                profile,
+                outputFile,
+                args.Contains("--force", StringComparer.OrdinalIgnoreCase));
+            PrintSummary(profile);
+            Console.WriteLine($"Generated assistant integration: {file}");
+            return 0;
+        }
+
         var output = GetOption(args, "--output")
             ?? Path.Combine(repository, ".portalcraft-ai");
         var result = new IntegrationGenerator().Generate(
@@ -165,6 +178,8 @@ public static class RepoToolCli
               analyze  <repository>                          Inspect without writing files.
               generate <repository> [--output <dir>] [--force]
                                                                Create a manifest and React/.NET scaffolding.
+              assistant <repository> [--output <file>] [--force]
+                                                               Generate typed assistant query and route integration.
               pr-scenarios <repository> [--branch <name>] [--since-days <n>]
                            [--limit <n>] [--output <dir>] [--force]
                                                                Derive test scenarios from recent branch changes.

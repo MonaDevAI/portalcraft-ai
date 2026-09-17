@@ -148,6 +148,14 @@ public sealed partial class RepositoryScanner
         {
             AddRoute(routes, match.Groups["route"].Value, source);
         }
+        if (Path.GetFileNameWithoutExtension(source)
+            .Contains("enum", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (Match match in EnumRouteValuePattern().Matches(text))
+            {
+                AddRoute(routes, match.Groups["route"].Value, source);
+            }
+        }
         foreach (Match match in NavigationCallPattern().Matches(text))
         {
             AddRoute(routes, match.Groups["route"].Value, source);
@@ -356,6 +364,9 @@ public sealed partial class RepositoryScanner
 
     [GeneratedRegex(@"\bpath\s*:\s*[""'](?<route>/[^""']+)[""']")]
     private static partial Regex ObjectRoutePattern();
+
+    [GeneratedRegex(@"\b[A-Za-z][A-Za-z0-9_]*\s*=\s*[""'](?<route>[a-z0-9]+(?:-[a-z0-9]+)+)[""']")]
+    private static partial Regex EnumRouteValuePattern();
 
     [GeneratedRegex(@"\b(?:navigate|setView|onOpenView)\s*\(\s*[""'](?<route>[a-zA-Z0-9/_-]+)[""']")]
     private static partial Regex NavigationCallPattern();

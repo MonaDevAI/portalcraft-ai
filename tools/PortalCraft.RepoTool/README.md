@@ -7,6 +7,7 @@ first-parent branch history.
 ```powershell
 portalcraft-ai-repo analyze C:\path\to\product
 portalcraft-ai-repo generate C:\path\to\product --output C:\path\to\product\.portalcraft-ai
+portalcraft-ai-repo assistant C:\path\to\product --output C:\path\to\portalCraftAssistant.generated.ts
 portalcraft-ai-repo pr-scenarios C:\path\to\product --branch main --since-days 30
 portalcraft-ai-repo knowledge C:\path\to\product --branch main --since-days 180
 portalcraft-ai-repo serve C:\path\to\product\.portalcraft-ai
@@ -15,3 +16,7 @@ portalcraft-ai-repo serve C:\path\to\product\.portalcraft-ai
 Generated output must be reviewed. The tool does not execute repository code,
 expose mutation operations, or replace product authorization. GET operations and
 clearly named read-only POST search/filter/lookup/query endpoints are eligible.
+
+The `assistant` command writes a standalone TypeScript module containing the
+discovered read-only query catalog, tagged portal views, and safe helpers for
+building in-portal search and validator links.

@@ -62,6 +62,9 @@ dotnet run --project tools\PortalCraft.RepoTool -- analyze C:\path\to\product
 
 dotnet run --project tools\PortalCraft.RepoTool -- generate C:\path\to\product `
   --output C:\path\to\product\.portalcraft-ai
+
+dotnet run --project tools\PortalCraft.RepoTool -- assistant C:\path\to\product `
+  --output C:\path\to\product\src\portalCraftAssistant.generated.ts
 ```
 
 Generated output includes:
@@ -69,6 +72,7 @@ Generated output includes:
 - `portalcraft-ai.manifest.json` with discovered evidence and query candidates
 - `server\PortalCraftGeneratedCatalog.cs` with a typed catalog API
 - `client\portalCraft.generated.ts` with typed query descriptors
+- `client\portalCraftAssistant.generated.ts` with safe, discovered in-portal route helpers
 - `client\PortalCraftGeneratedPanel.tsx` with reusable prompt UI
 - `dashboard\index.html` with an immediately runnable repository dashboard
 - integration instructions and safety checks
