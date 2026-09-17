@@ -25,4 +25,5 @@ The `knowledge` command accepts repeatable `--manuals-path` values for approved
 repository-relative Markdown files or directories. It converts those manuals
 into compact JSON, Markdown, and TypeScript catalogs with source paths. An
 absolute HTTPS `sourceUrl` in YAML front matter is preserved as the manual's
-external source link.
+external source link; optional `sourceTitle` supplies its user-facing citation
+label.

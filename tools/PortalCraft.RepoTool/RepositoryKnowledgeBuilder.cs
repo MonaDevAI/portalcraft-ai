@@ -193,6 +193,7 @@ public sealed partial class RepositoryKnowledgeBuilder
 
         var rawLines = content.Split(['\r', '\n']);
         var sourceUrl = ReadSourceUrl(rawLines);
+        var sourceTitle = ReadFrontMatterValue(rawLines, "sourceTitle");
         var contentStart = FrontMatterEnd(rawLines);
         var lines = rawLines
             .Skip(contentStart)
@@ -222,6 +223,7 @@ public sealed partial class RepositoryKnowledgeBuilder
             Path.GetRelativePath(root, path).Replace('\\', '/'),
             title.Length <= 160 ? title : title[..160],
             summary,
+            sourceTitle,
             sourceUrl);
     }
 
@@ -243,28 +245,39 @@ public sealed partial class RepositoryKnowledgeBuilder
 
     private static string? ReadSourceUrl(IReadOnlyList<string> lines)
     {
+        var value = ReadFrontMatterValue(lines, "sourceUrl");
+        if (value is null)
+        {
+            return null;
+        }
+        if (Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
+            uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            return uri.AbsoluteUri;
+        }
+        throw new ArgumentException(
+            $"Help manual sourceUrl must be an absolute HTTPS URL: {value}");
+    }
+
+    private static string? ReadFrontMatterValue(
+        IReadOnlyList<string> lines,
+        string name)
+    {
         var end = FrontMatterEnd(lines);
         if (end == 0)
         {
             return null;
         }
-        for (var index = 1; index < end - 1; index++)
-        {
-            var line = lines[index].Trim();
-            if (!line.StartsWith("sourceUrl:", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-            var value = line["sourceUrl:".Length..].Trim().Trim('"', '\'');
-            if (Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
-                uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
-            {
-                return uri.AbsoluteUri;
-            }
-            throw new ArgumentException(
-                $"Help manual sourceUrl must be an absolute HTTPS URL: {value}");
-        }
-        return null;
+        var prefix = $"{name}:";
+        var line = lines
+            .Skip(1)
+            .Take(end - 2)
+            .Select(value => value.Trim())
+            .FirstOrDefault(value => value.StartsWith(
+                prefix,
+                StringComparison.OrdinalIgnoreCase));
+        var result = line?[prefix.Length..].Trim().Trim('"', '\'');
+        return string.IsNullOrWhiteSpace(result) ? null : result;
     }
 
     private static bool ContainsExcludedDirectory(string root, string path)
@@ -343,6 +356,7 @@ public sealed partial class RepositoryKnowledgeBuilder
                 Environment.NewLine,
                 knowledge.Documents.Select(document =>
                     $"- `{document.Path}` — **{document.Title}**" +
+                    $"{(document.SourceTitle is null ? "" : $" (source: {document.SourceTitle})")}" +
                     $"{(document.SourceUrl is null ? "" : $" ([source]({document.SourceUrl}))")}: " +
                     document.Summary));
         var changes = knowledge.Changes.Count == 0

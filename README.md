@@ -147,11 +147,13 @@ Manuals may declare an approved external source link in YAML front matter:
 
 ```markdown
 ---
+sourceTitle: Product help manual
 sourceUrl: https://contoso.sharepoint.com/sites/product/manual
 ---
 ```
 
-Only absolute HTTPS links are retained in generated knowledge and invalid links fail generation.
+`sourceTitle` controls the user-facing citation label. Only absolute HTTPS links are
+retained in generated knowledge and invalid links fail generation.
 It reads repository files and Git history without executing product code. Teams must review
 the generated package before integration and continue to use authorized product APIs for
 live business data.

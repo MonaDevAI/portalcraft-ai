@@ -214,6 +214,7 @@ public sealed class RepositoryScannerTests : IDisposable
             "docs/help/pfam.md",
             """
             ---
+            sourceTitle: PFAM SharePoint Manual
             sourceUrl: https://contoso.sharepoint.com/sites/fmdm/pfam
             ---
             # Find a PFAM request
@@ -244,6 +245,9 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains(
             documents,
             document => document.SourceUrl == "https://contoso.sharepoint.com/sites/fmdm/pfam");
+        Assert.Contains(
+            documents,
+            document => document.SourceTitle == "PFAM SharePoint Manual");
         Assert.Contains(documents, document => document.Path == "docs/help/hierarchy.md");
         Assert.DoesNotContain(documents, document => document.Path == "docs/internal.md");
     }

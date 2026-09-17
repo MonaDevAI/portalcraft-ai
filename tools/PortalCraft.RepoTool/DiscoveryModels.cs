@@ -58,6 +58,7 @@ public sealed record RepositoryDocument(
     string Path,
     string Title,
     string Summary,
+    string? SourceTitle,
     string? SourceUrl);
 
 public sealed record RepositoryChangeInsight(
