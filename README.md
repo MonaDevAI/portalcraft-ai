@@ -134,11 +134,15 @@ a build-time knowledge package for an adopting assistant:
 ```powershell
 dotnet run --project tools\PortalCraft.RepoTool -- knowledge C:\path\to\product `
   --branch develop --since-days 180 --limit 100 `
+  --manuals-path docs\help `
   --output C:\path\to\product\.portalcraft-ai\knowledge
 ```
 
 The command writes JSON, Markdown, and a typed TypeScript module containing documentation
 summaries plus categorized bug fixes, enhancements, security changes, and other commits.
+Repeat `--manuals-path` to restrict documentation ingestion to approved repository-relative
+manual files or directories. When omitted, PortalCraft retains its repository-wide Markdown
+discovery behavior. Paths outside the repository and non-Markdown manual files are rejected.
 It reads repository files and Git history without executing product code. Teams must review
 the generated package before integration and continue to use authorized product APIs for
 live business data.

@@ -207,6 +207,50 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Equal("security", RepositoryKnowledgeBuilder.ClassifyChange("Enforce role access"));
     }
 
+    [Fact]
+    public void BuildsKnowledgeFromSelectedHelpManualPaths()
+    {
+        Write(
+            "docs/help/pfam.md",
+            """
+            # Find a PFAM request
+
+            Open request search and enter the request identifier.
+            """);
+        Write(
+            "docs/help/hierarchy.md",
+            """
+            # Search Product Hierarchy
+
+            Select a hierarchy level and enter its code.
+            """);
+        Write(
+            "docs/internal.md",
+            """
+            # Internal notes
+
+            This document is not an approved help manual.
+            """);
+
+        var documents = RepositoryKnowledgeBuilder.ReadDocumentation(
+            directory,
+            ["docs/help"]);
+
+        Assert.Equal(2, documents.Count);
+        Assert.Contains(documents, document => document.Path == "docs/help/pfam.md");
+        Assert.Contains(documents, document => document.Path == "docs/help/hierarchy.md");
+        Assert.DoesNotContain(documents, document => document.Path == "docs/internal.md");
+    }
+
+    [Fact]
+    public void RejectsHelpManualPathsOutsideRepository()
+    {
+        Directory.CreateDirectory(directory);
+
+        Assert.Throws<ArgumentException>(() =>
+            RepositoryKnowledgeBuilder.ReadDocumentation(directory, [".."]));
+    }
+
     private void Write(string relativePath, string content)
     {
         var path = Path.Combine(directory, relativePath.Replace('/', Path.DirectorySeparatorChar));

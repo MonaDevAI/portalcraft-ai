@@ -28,18 +28,21 @@ public sealed partial class RepositoryKnowledgeBuilder
         string repository,
         string? requestedBranch,
         int sinceDays,
-        int limit)
+        int limit,
+        IReadOnlyList<string>? manualPaths = null)
     {
         var report = new PullRequestScenarioAnalyzer().Analyze(
             repository,
             requestedBranch,
             sinceDays,
             limit);
-        var documents = ReadDocumentation(repository);
+        var documents = ReadDocumentation(repository, manualPaths);
         var warnings = report.Warnings.ToList();
         if (documents.Count == 0)
         {
-            warnings.Add("No repository Markdown documentation was found.");
+            warnings.Add(manualPaths?.Count > 0
+                ? "No Markdown help manuals were found in the selected paths."
+                : "No repository Markdown documentation was found.");
         }
 
         return new(
@@ -85,7 +88,9 @@ public sealed partial class RepositoryKnowledgeBuilder
         return [json, markdown, typescript];
     }
 
-    public static IReadOnlyList<RepositoryDocument> ReadDocumentation(string repository)
+    public static IReadOnlyList<RepositoryDocument> ReadDocumentation(
+        string repository,
+        IReadOnlyList<string>? manualPaths = null)
     {
         var root = Path.GetFullPath(repository);
         if (!Directory.Exists(root))
@@ -93,9 +98,12 @@ public sealed partial class RepositoryKnowledgeBuilder
             throw new DirectoryNotFoundException($"Repository directory does not exist: {root}");
         }
 
-        return Directory
-            .EnumerateFiles(root, "*.md", SearchOption.AllDirectories)
+        var files = manualPaths?.Count > 0
+            ? ResolveManualFiles(root, manualPaths)
+            : Directory.EnumerateFiles(root, "*.md", SearchOption.AllDirectories);
+        return files
             .Where(path => !ContainsExcludedDirectory(root, path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(path => DocumentationRank(root, path))
             .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
             .Take(40)
@@ -103,6 +111,51 @@ public sealed partial class RepositoryKnowledgeBuilder
             .Where(document => document is not null)
             .Cast<RepositoryDocument>()
             .ToArray();
+    }
+
+    private static IEnumerable<string> ResolveManualFiles(
+        string root,
+        IReadOnlyList<string> manualPaths)
+    {
+        foreach (var manualPath in manualPaths)
+        {
+            var candidate = Path.GetFullPath(Path.Combine(root, manualPath));
+            var relative = Path.GetRelativePath(root, candidate);
+            if (relative.Equals("..", StringComparison.Ordinal)
+                || relative.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                || Path.IsPathRooted(relative))
+            {
+                throw new ArgumentException(
+                    $"Help manual path must stay inside the repository: {manualPath}");
+            }
+
+            if (File.Exists(candidate))
+            {
+                if (!Path.GetExtension(candidate).Equals(".md", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException(
+                        $"Help manual files must use the .md extension: {manualPath}");
+                }
+                yield return candidate;
+                continue;
+            }
+
+            if (Directory.Exists(candidate))
+            {
+                foreach (var file in Directory.EnumerateFiles(
+                    candidate,
+                    "*.md",
+                    SearchOption.AllDirectories))
+                {
+                    yield return file;
+                }
+                continue;
+            }
+
+            throw new FileNotFoundException(
+                $"Help manual path does not exist: {manualPath}",
+                candidate);
+        }
     }
 
     public static string ClassifyChange(string title)

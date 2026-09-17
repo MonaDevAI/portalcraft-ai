@@ -69,11 +69,13 @@ public static class RepoToolCli
             var branch = GetOption(args, "--branch");
             var sinceDays = GetIntOption(args, "--since-days", 180);
             var limit = GetIntOption(args, "--limit", 100);
+            var manualPaths = GetOptions(args, "--manuals-path");
             var knowledge = new RepositoryKnowledgeBuilder().Build(
                 repository,
                 branch,
                 sinceDays,
-                limit);
+                limit,
+                manualPaths);
             var knowledgeOutput = GetOption(args, "--output")
                 ?? Path.Combine(repository, ".portalcraft-ai", "knowledge");
             var files = new RepositoryKnowledgeBuilder().Write(
@@ -81,6 +83,10 @@ public static class RepoToolCli
                 knowledgeOutput,
                 args.Contains("--force", StringComparer.OrdinalIgnoreCase));
             Console.WriteLine($"Branch: {knowledge.Branch}");
+            if (manualPaths.Count > 0)
+            {
+                Console.WriteLine($"Help manual paths: {manualPaths.Count}");
+            }
             Console.WriteLine($"Documentation sources: {knowledge.Documents.Count}");
             Console.WriteLine($"Recent changes: {knowledge.Changes.Count}");
             Console.WriteLine($"Generated {files.Count} files in {Path.GetFullPath(knowledgeOutput)}");
@@ -157,6 +163,26 @@ public static class RepoToolCli
         return parsed;
     }
 
+    private static IReadOnlyList<string> GetOptions(
+        IReadOnlyList<string> args,
+        string name)
+    {
+        var values = new List<string>();
+        for (var index = 0; index < args.Count; index++)
+        {
+            if (!args[index].Equals(name, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+            if (index + 1 >= args.Count)
+            {
+                throw new ArgumentException($"{name} requires a value.");
+            }
+            values.Add(args[index + 1]);
+        }
+        return values;
+    }
+
     private static void PrintSummary(RepositoryProfile profile)
     {
         Console.WriteLine($"Repository: {profile.Repository}");
@@ -184,7 +210,8 @@ public static class RepoToolCli
                            [--limit <n>] [--output <dir>] [--force]
                                                                Derive test scenarios from recent branch changes.
               knowledge <repository> [--branch <name>] [--since-days <n>]
-                        [--limit <n>] [--output <dir>] [--force]
+                        [--limit <n>] [--manuals-path <repo-relative-path>]...
+                        [--output <dir>] [--force]
                                                                Generate reviewed app-documentation and change knowledge.
               serve <generated-directory> [--port <n>]          Run the generated repository dashboard.
 
