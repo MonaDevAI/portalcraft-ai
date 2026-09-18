@@ -220,6 +220,12 @@ public sealed class RepositoryScannerTests : IDisposable
             # Find a PFAM request
 
             Open request search and enter the request identifier.
+
+            ## Validator review
+
+            **User question:** What should I review?
+
+            Confirm the hierarchy mapping and controlled attributes before approval.
             """);
         Write(
             "docs/help/hierarchy.md",
@@ -248,6 +254,11 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains(
             documents,
             document => document.SourceTitle == "PFAM SharePoint Manual");
+        Assert.Contains(
+            documents.Single(document => document.Path == "docs/help/pfam.md").Sections,
+            section => section.Title == "Validator review"
+                && section.Summary.Contains("controlled attributes")
+                && section.Summary.Contains("**User question:**"));
         Assert.Contains(documents, document => document.Path == "docs/help/hierarchy.md");
         Assert.DoesNotContain(documents, document => document.Path == "docs/internal.md");
     }

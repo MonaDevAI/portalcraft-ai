@@ -59,7 +59,12 @@ public sealed record RepositoryDocument(
     string Title,
     string Summary,
     string? SourceTitle,
-    string? SourceUrl);
+    string? SourceUrl,
+    IReadOnlyList<RepositoryDocumentSection> Sections);
+
+public sealed record RepositoryDocumentSection(
+    string Title,
+    string Summary);
 
 public sealed record RepositoryChangeInsight(
     string Commit,

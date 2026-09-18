@@ -207,6 +207,7 @@ public sealed partial class RepositoryKnowledgeBuilder
             .Where(line => !line.StartsWith('#')
                 && !line.StartsWith("```")
                 && !line.StartsWith('|')
+                && !line.StartsWith("<!--")
                 && !line.StartsWith("---"))
             .Take(6);
         var summary = CollapseWhitespace().Replace(string.Join(" ", summaryLines), " ").Trim();
@@ -224,7 +225,67 @@ public sealed partial class RepositoryKnowledgeBuilder
             title.Length <= 160 ? title : title[..160],
             summary,
             sourceTitle,
-            sourceUrl);
+            sourceUrl,
+            ReadSections(rawLines, contentStart));
+    }
+
+    private static IReadOnlyList<RepositoryDocumentSection> ReadSections(
+        IReadOnlyList<string> lines,
+        int contentStart)
+    {
+        var sections = new List<RepositoryDocumentSection>();
+        string? title = null;
+        var content = new List<string>();
+
+        void AddSection()
+        {
+            if (title is null)
+            {
+                return;
+            }
+
+            var summary = CollapseWhitespace()
+                .Replace(string.Join(" ", content), " ")
+                .Trim();
+            if (summary.Length == 0)
+            {
+                return;
+            }
+            if (summary.Length > 1400)
+            {
+                summary = $"{summary[..1397]}...";
+            }
+
+            sections.Add(new(title, summary));
+        }
+
+        for (var index = contentStart; index < lines.Count; index++)
+        {
+            var line = lines[index].Trim();
+            if (line.StartsWith('#'))
+            {
+                AddSection();
+                title = line.TrimStart('#', ' ');
+                content.Clear();
+                continue;
+            }
+            if (title is null
+                || line.Length == 0
+                || line.StartsWith("```")
+                || line.StartsWith("<!--")
+                || line.Equals("---", StringComparison.Ordinal)
+                || Regex.IsMatch(line, @"^\|(?:\s*:?-+:?\s*\|)+$"))
+            {
+                continue;
+            }
+
+            content.Add(line.StartsWith('|')
+                ? line.Trim('|', ' ').Replace(" | ", "; ")
+                : Regex.Replace(line, @"^(?:[-*]\s+)", ""));
+        }
+
+        AddSection();
+        return sections;
     }
 
     private static int FrontMatterEnd(IReadOnlyList<string> lines)
