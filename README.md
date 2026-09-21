@@ -120,6 +120,10 @@ parameters before calling a product-owned executor. The portal supplies only the
 authorized operation adapters that fetch its data, while query phrasing and parsing stay
 shared.
 
+Product executors can return Copilot-style Markdown through
+`formatPortalCraftQueryResult`, including a concise summary, labeled fields, detail
+sections, and safe internal or HTTPS action links such as “Open highlighted request.”
+
 Discovered `GET` operations and clearly named read-only POST searches (`search`, `filter`,
 `lookup`, or `query`) become query candidates. Create, update, submit, approve, reject,
 delete, generate, upload, and import operations are never exposed automatically. The

@@ -178,6 +178,8 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains("parsePortalCraftQueryCommand", generated);
         Assert.Contains("executePortalCraftQueryCommand", generated);
         Assert.Contains("describePortalCraftQueries", generated);
+        Assert.Contains("formatPortalCraftQueryResult", generated);
+        Assert.Contains("Query result actions require a label", generated);
         Assert.Contains("No authorized executor is registered", generated);
         Assert.Contains("Unsupported query parameters", generated);
         Assert.Contains("portalCraftHelpCommandDescription", generated);

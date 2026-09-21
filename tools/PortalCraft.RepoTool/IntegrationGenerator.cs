@@ -159,6 +159,23 @@ public sealed class IntegrationGenerator
           parameters: Readonly<Record<string, unknown>>;
         };
 
+        export type PortalCraftQueryResult = {
+          title: string;
+          summary?: string;
+          fields?: readonly {
+            label: string;
+            value: string | number | boolean | null | undefined;
+          }[];
+          sections?: readonly {
+            title: string;
+            content: string;
+          }[];
+          actions?: readonly {
+            label: string;
+            url: string;
+          }[];
+        };
+
         export type PortalCraftQueryExecutor = (
           parameters: Readonly<Record<string, unknown>>,
           query: PortalCraftAssistantQuery
@@ -375,6 +392,47 @@ public sealed class IntegrationGenerator
             );
           }
           return executor(parsed.parameters, parsed.query);
+        }
+
+        function isSafeResultActionUrl(url: string): boolean {
+          return (url.startsWith("/") && !url.startsWith("//")) ||
+            url.startsWith("https://");
+        }
+
+        export function formatPortalCraftQueryResult(
+          result: PortalCraftQueryResult
+        ): string {
+          const title = result.title.trim();
+          if (!title) throw new Error("A query result title is required.");
+          const lines = [`**${title}**`];
+          if (result.summary?.trim()) lines.push(result.summary.trim());
+          const fields = (result.fields || []).filter(
+            field => field.value !== null &&
+              field.value !== undefined &&
+              String(field.value).trim().length > 0
+          );
+          if (fields.length > 0) {
+            lines.push("");
+            fields.forEach(field => {
+              lines.push(`**${field.label}:** ${String(field.value)}`);
+            });
+          }
+          (result.sections || []).forEach(section => {
+            if (!section.title.trim() || !section.content.trim()) return;
+            lines.push("", `**${section.title.trim()}**`, section.content.trim());
+          });
+          const actions = (result.actions || []).filter(action => {
+            if (!action.label.trim() || !isSafeResultActionUrl(action.url)) {
+              throw new Error("Query result actions require a label and a safe portal or HTTPS URL.");
+            }
+            return true;
+          });
+          if (actions.length > 0) {
+            lines.push("", actions.map(
+              action => `[${action.label.trim()}](${action.url})`
+            ).join(" · "));
+          }
+          return lines.join("\n");
         }
 
         export const portalCraftConversationPatterns = [
