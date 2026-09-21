@@ -81,3 +81,10 @@ public sealed record RepositoryKnowledge(
     IReadOnlyList<RepositoryDocument> Documents,
     IReadOnlyList<RepositoryChangeInsight> Changes,
     IReadOnlyList<string> Warnings);
+
+public sealed record CopilotStudioPackageResult(
+    string ProductName,
+    string AssistantName,
+    string OutputDirectory,
+    IReadOnlyList<string> Files,
+    IReadOnlyList<string> Warnings);

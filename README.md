@@ -158,6 +158,34 @@ It reads repository files and Git history without executing product code. Teams 
 the generated package before integration and continue to use authorized product APIs for
 live business data.
 
+### Generate a Copilot Studio assistant package
+
+PortalCraft AI can combine repository discovery and reviewed knowledge into a Copilot Studio
+onboarding package:
+
+```powershell
+dotnet run --project tools\PortalCraft.RepoTool -- copilot-studio C:\path\to\product `
+  --product-name "Product Portal" `
+  --assistant-name "Product Assistant" `
+  --api-base-url https://product-api.contoso.com `
+  --branch develop `
+  --manuals-path docs\help `
+  --output C:\path\to\product\.portalcraft-ai\copilot-studio
+```
+
+The package contains:
+
+- natural-language agent instructions that treat paraphrases and business synonyms as the
+  same intent when supported by evidence
+- an OpenAPI document containing only discovered read-only query candidates
+- a knowledge-source manifest for approved SharePoint links and repository manuals
+- secure custom-application channel settings for a server-side token broker
+- an import and product-review checklist
+
+The generator does not publish to a Power Platform environment or create credentials.
+Product owners must review API contracts, configure Microsoft Entra ID authentication,
+add approved knowledge sources, test permissions, and publish the agent in Copilot Studio.
+
 ## Run locally
 
 Requirements:

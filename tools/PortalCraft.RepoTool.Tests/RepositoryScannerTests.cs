@@ -290,6 +290,92 @@ public sealed class RepositoryScannerTests : IDisposable
             RepositoryKnowledgeBuilder.ReadDocumentation(directory, ["docs/help"]));
     }
 
+    [Fact]
+    public void GeneratesCopilotStudioPackageWithSemanticInstructionsAndReadOnlyActions()
+    {
+        Write(
+            "Program.cs",
+            """
+            app.MapGet("/api/requests/{requestId}", (string requestId) => Results.Ok());
+            app.MapPost("/api/requests/search", (string requester) => Results.Ok());
+            app.MapPost("/api/requests/approve", () => Results.Ok());
+            """);
+        Write(
+            "routes.tsx",
+            """export const routes = [{ path: "/requests" }];""");
+        Write(
+            "docs/help/requests.md",
+            """
+            ---
+            sourceTitle: Request help
+            sourceUrl: https://contoso.sharepoint.com/sites/portal/requests
+            ---
+            # Request guidance
+
+            Find a request by its identifier or requester.
+
+            ## Search requests
+
+            Users can phrase request searches in different ways.
+            """);
+        var profile = new RepositoryScanner().Scan(directory);
+        var knowledge = new RepositoryKnowledge(
+            directory,
+            "main",
+            DateTimeOffset.UtcNow,
+            RepositoryKnowledgeBuilder.ReadDocumentation(directory, ["docs/help"]),
+            [],
+            []);
+        var output = Path.Combine(directory, "copilot-studio");
+
+        var result = new CopilotStudioPackageBuilder().Write(
+            profile,
+            knowledge,
+            output,
+            "Request Portal",
+            "Request Assistant",
+            "https://portal-api.contoso.com",
+            false);
+
+        Assert.Equal(5, result.Files.Count);
+        var instructions = File.ReadAllText(Path.Combine(output, "agent-instructions.md"));
+        Assert.Contains("Interpret meaning rather than requiring an exact trigger phrase", instructions);
+        Assert.Contains("Ask one concise clarification", instructions);
+        var openApi = File.ReadAllText(Path.Combine(output, "actions.openapi.json"));
+        Assert.Contains("https://portal-api.contoso.com", openApi);
+        Assert.Contains("/api/requests/{requestId}", openApi);
+        Assert.Contains("/api/requests/search", openApi);
+        Assert.DoesNotContain("/api/requests/approve", openApi);
+        Assert.Contains("\"x-portalcraft-read-only\": true", openApi);
+        var sources = File.ReadAllText(Path.Combine(output, "knowledge-sources.json"));
+        Assert.Contains("Request help", sources);
+        Assert.Contains("https://contoso.sharepoint.com/sites/portal/requests", sources);
+    }
+
+    [Fact]
+    public void RequiresHttpsForCopilotStudioApiBaseUrl()
+    {
+        Write("Program.cs", """app.MapGet("/api/orders", () => Results.Ok());""");
+        var profile = new RepositoryScanner().Scan(directory);
+        var knowledge = new RepositoryKnowledge(
+            directory,
+            "main",
+            DateTimeOffset.UtcNow,
+            [],
+            [],
+            []);
+
+        Assert.Throws<ArgumentException>(() =>
+            new CopilotStudioPackageBuilder().Write(
+                profile,
+                knowledge,
+                Path.Combine(directory, "copilot-studio"),
+                "Orders",
+                "Orders Assistant",
+                "http://portal-api.contoso.com",
+                false));
+    }
+
     private void Write(string relativePath, string content)
     {
         var path = Path.Combine(directory, relativePath.Replace('/', Path.DirectorySeparatorChar));

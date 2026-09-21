@@ -24,7 +24,7 @@ public static class RepoToolCli
         }
 
         var command = args[0].ToLowerInvariant();
-        if (command is not ("analyze" or "generate" or "assistant" or "knowledge" or "pr-scenarios" or "serve"))
+        if (command is not ("analyze" or "generate" or "assistant" or "copilot-studio" or "knowledge" or "pr-scenarios" or "serve"))
         {
             throw new ArgumentException($"Unknown command '{args[0]}'.");
         }
@@ -98,6 +98,47 @@ public static class RepoToolCli
         }
 
         var profile = new RepositoryScanner().Scan(repository);
+        if (command == "copilot-studio")
+        {
+            var branch = GetOption(args, "--branch");
+            var sinceDays = GetIntOption(args, "--since-days", 180);
+            var limit = GetIntOption(args, "--limit", 100);
+            var manualPaths = GetOptions(args, "--manuals-path");
+            var productName = GetOption(args, "--product-name")
+                ?? new DirectoryInfo(repository).Name;
+            var assistantName = GetOption(args, "--assistant-name")
+                ?? $"{productName} Assistant";
+            var knowledge = new RepositoryKnowledgeBuilder().Build(
+                repository,
+                branch,
+                sinceDays,
+                limit,
+                manualPaths);
+            var packageOutput = GetOption(args, "--output")
+                ?? Path.Combine(repository, ".portalcraft-ai", "copilot-studio");
+            var copilotResult = new CopilotStudioPackageBuilder().Write(
+                profile,
+                knowledge,
+                packageOutput,
+                productName,
+                assistantName,
+                GetOption(args, "--api-base-url"),
+                args.Contains("--force", StringComparer.OrdinalIgnoreCase));
+            PrintSummary(profile);
+            Console.WriteLine($"Branch: {knowledge.Branch}");
+            Console.WriteLine($"Knowledge sources: {knowledge.Documents.Count}");
+            Console.WriteLine($"Generated {copilotResult.Files.Count} Copilot Studio files in {copilotResult.OutputDirectory}");
+            foreach (var file in copilotResult.Files)
+            {
+                Console.WriteLine($"  {Path.GetRelativePath(copilotResult.OutputDirectory, file)}");
+            }
+            foreach (var warning in copilotResult.Warnings.Concat(knowledge.Warnings))
+            {
+                Console.WriteLine($"warning: {warning}");
+            }
+            return 0;
+        }
+
         if (command == "analyze")
         {
             PrintSummary(profile);
@@ -206,6 +247,12 @@ public static class RepoToolCli
                                                                Create a manifest and React/.NET scaffolding.
               assistant <repository> [--output <file>] [--force]
                                                                Generate typed assistant query and route integration.
+              copilot-studio <repository> [--product-name <name>] [--assistant-name <name>]
+                             [--api-base-url <https-url>] [--branch <name>]
+                             [--since-days <n>] [--limit <n>]
+                             [--manuals-path <repo-relative-path>]...
+                             [--output <dir>] [--force]
+                                                               Generate a reviewed Copilot Studio onboarding package.
               pr-scenarios <repository> [--branch <name>] [--since-days <n>]
                            [--limit <n>] [--output <dir>] [--force]
                                                                Derive test scenarios from recent branch changes.
