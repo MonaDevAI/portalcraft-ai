@@ -136,6 +136,52 @@ public sealed class RepositoryScannerTests : IDisposable
     }
 
     [Fact]
+    public void GeneratesGroundedHelpDocumentAssistantTopics()
+    {
+        Write(
+            "routes.tsx",
+            """export const routes = [{ path: "/requests" }];""");
+        Write(
+            "docs/help/requests.md",
+            """
+            ---
+            sourceTitle: Request help
+            sourceUrl: https://contoso.sharepoint.com/sites/portal/requests
+            ---
+            # Request guidance
+
+            Use request search to find governed requests.
+
+            ## Prepare a request
+
+            Gather the request type, business justification, owner, and effective date.
+
+            ## Submit checks
+
+            Validate required fields and review the destination workflow before submitting.
+            """);
+        var profile = new RepositoryScanner().Scan(directory);
+        var documents = RepositoryKnowledgeBuilder.ReadDocumentation(
+            directory,
+            ["docs/help"]);
+        var output = Path.Combine(directory, "portalCraftAssistant.generated.ts");
+
+        new IntegrationGenerator().GenerateAssistantIntegration(
+            profile,
+            output,
+            documents);
+
+        var generated = File.ReadAllText(output);
+        Assert.Contains("portalCraftHelpTopics", generated);
+        Assert.Contains("portalCraftHelpCommandDescription", generated);
+        Assert.Contains("answerPortalCraftHelpTopic", generated);
+        Assert.Contains("request-guidance-prepare-a-request", generated);
+        Assert.Contains("Gather the request type", generated);
+        Assert.Contains("https://contoso.sharepoint.com/sites/portal/requests", generated);
+        Assert.Contains("explain help topic <topic-id>", generated);
+    }
+
+    [Fact]
     public void RefusesToOverwriteNonEmptyOutputWithoutForce()
     {
         Write("Program.cs", """app.MapGet("/api/orders", () => Results.Ok());""");

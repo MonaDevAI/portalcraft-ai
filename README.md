@@ -64,6 +64,7 @@ dotnet run --project tools\PortalCraft.RepoTool -- generate C:\path\to\product `
   --output C:\path\to\product\.portalcraft-ai
 
 dotnet run --project tools\PortalCraft.RepoTool -- assistant C:\path\to\product `
+  --manuals-path docs\help `
   --output C:\path\to\product\src\portalCraftAssistant.generated.ts
 ```
 
@@ -73,9 +74,16 @@ Generated output includes:
 - `server\PortalCraftGeneratedCatalog.cs` with a typed catalog API
 - `client\portalCraft.generated.ts` with typed query descriptors
 - `client\portalCraftAssistant.generated.ts` with safe, discovered in-portal route helpers
+  and optional reviewed help-document topics, semantic matching, and clickable citations
 - `client\PortalCraftGeneratedPanel.tsx` with reusable prompt UI
 - `dashboard\index.html` with an immediately runnable repository dashboard
 - integration instructions and safety checks
+
+When `assistant` receives one or more `--manuals-path` values, it also emits canonical
+`explain help topic <topic-id>` commands. A product's existing model can translate
+paraphrased questions to those allowlisted commands, while the generated module returns
+only reviewed document text and source citations. It also includes deterministic local
+matching for applications that do not use a model.
 
 Discovered `GET` operations and clearly named read-only POST searches (`search`, `filter`,
 `lookup`, or `query`) become query candidates. Create, update, submit, approve, reject,

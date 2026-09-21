@@ -149,11 +149,17 @@ public static class RepoToolCli
         {
             var outputFile = GetOption(args, "--output")
                 ?? Path.Combine(repository, ".portalcraft-ai", "client", "portalCraftAssistant.generated.ts");
+            var manualPaths = GetOptions(args, "--manuals-path");
+            var helpDocuments = manualPaths.Count > 0
+                ? RepositoryKnowledgeBuilder.ReadDocumentation(repository, manualPaths)
+                : [];
             var file = new IntegrationGenerator().GenerateAssistantIntegration(
                 profile,
                 outputFile,
+                helpDocuments,
                 args.Contains("--force", StringComparer.OrdinalIgnoreCase));
             PrintSummary(profile);
+            Console.WriteLine($"Help documents: {helpDocuments.Count}");
             Console.WriteLine($"Generated assistant integration: {file}");
             return 0;
         }
@@ -245,8 +251,10 @@ public static class RepoToolCli
               analyze  <repository>                          Inspect without writing files.
               generate <repository> [--output <dir>] [--force]
                                                                Create a manifest and React/.NET scaffolding.
-              assistant <repository> [--output <file>] [--force]
-                                                               Generate typed assistant query and route integration.
+              assistant <repository> [--manuals-path <repo-relative-path>]...
+                        [--output <file>] [--force]
+                                                               Generate typed assistant query, route, and optional
+                                                               reviewed help-document integration.
               copilot-studio <repository> [--product-name <name>] [--assistant-name <name>]
                              [--api-base-url <https-url>] [--branch <name>]
                              [--since-days <n>] [--limit <n>]
