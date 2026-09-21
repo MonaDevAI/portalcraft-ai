@@ -229,7 +229,7 @@ It reads repository files and Git history without executing product code. Teams 
 the generated package before integration and continue to use authorized product APIs for
 live business data.
 
-### Generate a Copilot Studio assistant package
+### Generate an unvalidated Copilot Studio preview package
 
 PortalCraft AI can combine repository discovery and reviewed knowledge into a Copilot Studio
 onboarding package:
@@ -252,6 +252,12 @@ The package contains:
 - a knowledge-source manifest for approved SharePoint links and repository manuals
 - secure custom-application channel settings for a server-side token broker
 - an import and product-review checklist
+
+> **Current validation status:** PortalCraft has not validated package import or runtime
+> behavior in Microsoft Copilot Studio because the project does not have access to a
+> licensed Copilot Studio environment. Automated tests validate generation, file structure,
+> read-only filtering, and required review warnings only. Treat the output as a review-only
+> preview—not as a verified Copilot Studio solution.
 
 The generator does not publish to a Power Platform environment or create credentials.
 Product owners must review API contracts, configure Microsoft Entra ID authentication,

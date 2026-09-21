@@ -465,6 +465,9 @@ public sealed class RepositoryScannerTests : IDisposable
             false);
 
         Assert.Equal(5, result.Files.Count);
+        Assert.Contains(
+            result.Warnings,
+            warning => warning.Contains("not validated by PortalCraft", StringComparison.OrdinalIgnoreCase));
         var instructions = File.ReadAllText(Path.Combine(output, "agent-instructions.md"));
         Assert.Contains("Interpret meaning rather than requiring an exact trigger phrase", instructions);
         Assert.Contains("Ask one concise clarification", instructions);
@@ -477,6 +480,9 @@ public sealed class RepositoryScannerTests : IDisposable
         var sources = File.ReadAllText(Path.Combine(output, "knowledge-sources.json"));
         Assert.Contains("Request help", sources);
         Assert.Contains("https://contoso.sharepoint.com/sites/portal/requests", sources);
+        var readme = File.ReadAllText(Path.Combine(output, "README.md"));
+        Assert.Contains("NOT VALIDATED IN COPILOT STUDIO", readme);
+        Assert.Contains("licensed Copilot Studio environment", readme);
     }
 
     [Fact]

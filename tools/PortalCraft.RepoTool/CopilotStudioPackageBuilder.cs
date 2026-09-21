@@ -32,7 +32,12 @@ public sealed partial class CopilotStudioPackageBuilder
                 $"Output directory is not empty: {output}. Pass --force to replace generated files.");
         }
 
-        var warnings = new List<string>();
+        var warnings = new List<string>
+        {
+            "Copilot Studio import and runtime behavior are not validated by PortalCraft. " +
+            "The project does not currently have a licensed Copilot Studio environment; " +
+            "treat this package as a review-only preview until a licensed product team imports and tests it."
+        };
         var baseUri = ResolveApiBaseUri(apiBaseUrl, warnings);
         var approvedOperations = SelectApprovedOperations(profile);
         if (approvedOperations.Count == 0)
@@ -324,6 +329,11 @@ public sealed partial class CopilotStudioPackageBuilder
             PortalCraft generated this review package for {productName}. It contains
             {actionCount} read-only action definitions and {knowledgeCount} knowledge candidates.
             It does not publish an agent or create tenant resources.
+
+            > **Validation status: NOT VALIDATED IN COPILOT STUDIO.**
+            > PortalCraft does not currently have access to a licensed Copilot Studio environment.
+            > Generation tests verify file structure and safety filtering only; they do not prove
+            > that this package imports successfully or behaves correctly at runtime.
 
             ## Import and configure
 

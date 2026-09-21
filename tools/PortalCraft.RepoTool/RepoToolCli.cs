@@ -129,6 +129,8 @@ public static class RepoToolCli
             PrintSummary(profile);
             Console.WriteLine($"Branch: {knowledge.Branch}");
             Console.WriteLine($"Knowledge sources: {knowledge.Documents.Count}");
+            Console.WriteLine(
+                "Validation status: NOT VALIDATED in Copilot Studio; no licensed environment is available.");
             Console.WriteLine($"Generated {copilotResult.Files.Count} Copilot Studio files in {copilotResult.OutputDirectory}");
             foreach (var file in copilotResult.Files)
             {
@@ -307,7 +309,7 @@ public static class RepoToolCli
                              [--since-days <n>] [--limit <n>]
                              [--manuals-path <repo-relative-path>]...
                              [--output <dir>] [--force]
-                                                               Generate a reviewed Copilot Studio onboarding package.
+                                                               Generate an unvalidated, review-only Copilot Studio preview package.
               pr-scenarios <repository> [--branch <name>] [--since-days <n>]
                            [--limit <n>] [--output <dir>] [--force]
                                                                Derive test scenarios from recent branch changes.
