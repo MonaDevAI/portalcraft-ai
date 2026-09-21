@@ -203,6 +203,66 @@ public sealed class RepositoryScannerTests : IDisposable
     }
 
     [Fact]
+    public void GeneratesConfiguredLookupClarificationAndPortalActions()
+    {
+        Write("Program.cs", """app.MapGet("/api/requests/{requestId}", () => Results.Ok());""");
+        var profile = new RepositoryScanner().Scan(directory);
+        var output = Path.Combine(directory, "portalCraftAssistant.generated.ts");
+        var configuration = new PortalCraftAssistantConfiguration
+        {
+            AssistantName = "Contoso Assistant",
+            LookupKeys =
+            [
+                new PortalCraftLookupKey
+                {
+                    Id = "requestId",
+                    Label = "Request ID",
+                    Example = "REQ-100",
+                    Aliases = ["request", "request id"],
+                },
+                new PortalCraftLookupKey
+                {
+                    Id = "validatorCRNumber",
+                    Label = "Validator CR",
+                    Example = "VCR-100",
+                    Aliases = ["validator cr"],
+                },
+            ],
+            BusinessEntities =
+            [
+                new PortalCraftBusinessEntity
+                {
+                    Id = "ProductUnit",
+                    Label = "Product Unit",
+                    Group = "Product hierarchy",
+                    Aliases = ["product unit"],
+                    RequestRoute = "/search-product-hierarchy-requests",
+                    RouteParameters = new Dictionary<string, string>
+                    {
+                        ["hierarchyEntity"] = "ProductUnit",
+                    },
+                },
+            ],
+        };
+
+        new IntegrationGenerator().GenerateAssistantIntegration(
+            profile,
+            output,
+            assistantConfiguration: configuration);
+
+        var generated = File.ReadAllText(output);
+        Assert.Contains("portalCraftAssistantRequirements", generated);
+        Assert.Contains("answerPortalCraftLookupClarification", generated);
+        Assert.Contains("portalCraftLookupClarificationPatterns", generated);
+        Assert.Contains("buildPortalCraftRequestAction", generated);
+        Assert.Contains("Contoso Assistant", generated);
+        Assert.Contains("Validator CR", generated);
+        Assert.Contains("Product Unit", generated);
+        Assert.Contains("/search-product-hierarchy-requests", generated);
+        Assert.Contains("hierarchyEntity", generated);
+    }
+
+    [Fact]
     public void RefusesToOverwriteNonEmptyOutputWithoutForce()
     {
         Write("Program.cs", """app.MapGet("/api/orders", () => Results.Ok());""");

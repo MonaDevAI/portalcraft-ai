@@ -45,7 +45,8 @@ public sealed class IntegrationGenerator
         RepositoryProfile profile,
         string outputFile,
         IReadOnlyList<RepositoryDocument>? helpDocuments = null,
-        bool force = false)
+        bool force = false,
+        PortalCraftAssistantConfiguration? assistantConfiguration = null)
     {
         var output = Path.GetFullPath(outputFile);
         if (File.Exists(output) && !force)
@@ -55,7 +56,12 @@ public sealed class IntegrationGenerator
         }
 
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-        File.WriteAllText(output, BuildAssistantIntegration(profile, helpDocuments ?? []));
+        File.WriteAllText(
+            output,
+            BuildAssistantIntegration(
+                profile,
+                helpDocuments ?? [],
+                ValidateAssistantConfiguration(assistantConfiguration)));
         return output;
     }
 
@@ -125,8 +131,10 @@ public sealed class IntegrationGenerator
 
     private static string BuildAssistantIntegration(
         RepositoryProfile profile,
-        IReadOnlyList<RepositoryDocument> helpDocuments)
+        IReadOnlyList<RepositoryDocument> helpDocuments,
+        PortalCraftAssistantConfiguration? assistantConfiguration = null)
     {
+        assistantConfiguration ??= new PortalCraftAssistantConfiguration();
         var views = profile.UiRoutes.Select(route => new
         {
             path = route.Path,
@@ -199,6 +207,32 @@ public sealed class IntegrationGenerator
           repositoryPath: string;
         };
 
+        export type PortalCraftAssistantLookupKey = {
+          id: string;
+          label: string;
+          example: string;
+          aliases: readonly string[];
+        };
+
+        export type PortalCraftAssistantBusinessEntity = {
+          id: string;
+          label: string;
+          group: string;
+          aliases: readonly string[];
+          requestRoute: string;
+          requestActionLabel?: string | null;
+          routeParameters: Readonly<Record<string, string>>;
+        };
+
+        export type PortalCraftAssistantRequirements = {
+          assistantName: string;
+          lookupKeys: readonly PortalCraftAssistantLookupKey[];
+          businessEntities: readonly PortalCraftAssistantBusinessEntity[];
+        };
+
+        export const portalCraftAssistantRequirements: PortalCraftAssistantRequirements =
+          {{JsonSerializer.Serialize(assistantConfiguration, JsonOptions)}};
+
         export const portalCraftAssistantQueries =
           {{JsonSerializer.Serialize(profile.QueryCandidates, JsonOptions)}} as const;
 
@@ -246,6 +280,7 @@ public sealed class IntegrationGenerator
           {{JsonSerializer.Serialize(sampleQuestions, JsonOptions)}} as const;
 
         export const portalCraftAssistantSetup = {
+          assistantName: portalCraftAssistantRequirements.assistantName,
           supportedQuestionTypes: [
             "Read-only portal data and request lookups",
             "Reviewed help-document process and definition questions",
@@ -256,6 +291,8 @@ public sealed class IntegrationGenerator
           reviewedDocuments: Array.from(new Set(
             portalCraftHelpTopics.map(topic => topic.documentTitle)
           )),
+          lookupKeys: portalCraftAssistantRequirements.lookupKeys,
+          businessEntities: portalCraftAssistantRequirements.businessEntities,
         } as const;
 
         const SAFE_PARAMETER_NAME = /^[A-Za-z][A-Za-z0-9]{0,63}$/;
@@ -435,6 +472,86 @@ public sealed class IntegrationGenerator
           return lines.join("\n");
         }
 
+        function escapePortalCraftRegex(value: string): string {
+          return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        }
+
+        export const portalCraftLookupClarificationPatterns: readonly RegExp[] = (() => {
+          const aliases = portalCraftAssistantRequirements.lookupKeys
+            .flatMap(key => key.aliases)
+            .filter(Boolean)
+            .sort((left, right) => right.length - left.length)
+            .map(escapePortalCraftRegex);
+          if (aliases.length === 0 ||
+              portalCraftAssistantRequirements.businessEntities.length === 0) {
+            return [];
+          }
+          const lookup = `(?:${aliases.join("|")})`;
+          return [new RegExp(
+            `^(?:can\\s+you\\s+|i\\s+want\\s+to\\s+)?` +
+            `(?:find|search|show|fetch|look\\s*up)(?:\\s+me)?(?:\\s+(?:a|the|by))?` +
+            `\\s+${lookup}(?:\\s+or\\s+${lookup})*[?.]*$`,
+            "i"
+          )];
+        })();
+
+        export function answerPortalCraftLookupClarification(
+          input: string
+        ): string | undefined {
+          const { lookupKeys, businessEntities } = portalCraftAssistantRequirements;
+          if (!portalCraftLookupClarificationPatterns.some(
+            pattern => pattern.test(input.trim())
+          )) return undefined;
+
+          const lines = [
+            `**Find a request in ${portalCraftAssistantRequirements.assistantName}**`,
+            "Which identifier do you have?",
+            ...lookupKeys.map(key =>
+              `- **${key.label}**${key.example ? ` — for example \`${key.example}\`` : ""}`
+            ),
+            "",
+            "Which business entity should I search?",
+          ];
+          const groups = Array.from(new Set(businessEntities.map(entity => entity.group)));
+          groups.forEach(group => {
+            const labels = businessEntities
+              .filter(entity => entity.group === group)
+              .map(entity => entity.label);
+            lines.push(`- **${group}:** ${labels.join(", ")}`);
+          });
+          lines.push(
+            "",
+            "After you provide the identifier and entity, I’ll return the matching request with a link that opens it highlighted in the portal."
+          );
+          return lines.join("\n");
+        }
+
+        export function buildPortalCraftRequestAction(
+          entityId: string,
+          requestId: string
+        ): { label: string; url: string } {
+          const entity = portalCraftAssistantRequirements.businessEntities.find(
+            candidate => candidate.id.toLowerCase() === entityId.toLowerCase()
+          );
+          if (!entity) throw new Error(`Unknown portal business entity "${entityId}".`);
+          const normalizedRequestId = requestId.trim();
+          if (!normalizedRequestId) throw new Error("A request ID is required.");
+          const parameters: Record<string, string> = {
+            requestId: normalizedRequestId,
+            highlightRequest: normalizedRequestId,
+            ...entity.routeParameters,
+          };
+          const query = Object.entries(parameters)
+            .map(([key, value]) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+            )
+            .join("&");
+          return {
+            label: `Open highlighted ${entity.requestActionLabel || entity.label} request`,
+            url: `${entity.requestRoute}?${query}`,
+          };
+        }
+
         export const portalCraftConversationPatterns = [
           /^(?:hi|hello|hey)(?:\s+(?:there|assistant))?[!.?]*$/i,
           /^good\s+(?:morning|afternoon|evening)(?:\s+(?:there|assistant))?[!.?]*$/i,
@@ -580,6 +697,57 @@ public sealed class IntegrationGenerator
           return topic ? answerPortalCraftHelpTopic(topic.id) : undefined;
         }
         """;
+    }
+
+    private static PortalCraftAssistantConfiguration? ValidateAssistantConfiguration(
+        PortalCraftAssistantConfiguration? configuration)
+    {
+        if (configuration is null)
+        {
+            return null;
+        }
+        if (string.IsNullOrWhiteSpace(configuration.AssistantName))
+        {
+            throw new InvalidOperationException("Assistant configuration requires assistantName.");
+        }
+        if (configuration.LookupKeys.Select(key => key.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count()
+            != configuration.LookupKeys.Count)
+        {
+            throw new InvalidOperationException("Assistant lookup key IDs must be unique.");
+        }
+        foreach (var key in configuration.LookupKeys)
+        {
+            if (string.IsNullOrWhiteSpace(key.Id)
+                || string.IsNullOrWhiteSpace(key.Label)
+                || key.Aliases.Count == 0
+                || key.Aliases.Any(string.IsNullOrWhiteSpace))
+            {
+                throw new InvalidOperationException(
+                    "Each assistant lookup key requires an id, label, and at least one alias.");
+            }
+        }
+        if (configuration.BusinessEntities
+            .Select(entity => entity.Id)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count() != configuration.BusinessEntities.Count)
+        {
+            throw new InvalidOperationException("Assistant business entity IDs must be unique.");
+        }
+        foreach (var entity in configuration.BusinessEntities)
+        {
+            if (string.IsNullOrWhiteSpace(entity.Id)
+                || string.IsNullOrWhiteSpace(entity.Label)
+                || string.IsNullOrWhiteSpace(entity.Group)
+                || entity.Aliases.Count == 0
+                || entity.Aliases.Any(string.IsNullOrWhiteSpace)
+                || !entity.RequestRoute.StartsWith("/", StringComparison.Ordinal)
+                || entity.RequestRoute.StartsWith("//", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "Each assistant business entity requires an id, label, group, aliases, and a safe portal requestRoute.");
+            }
+        }
+        return configuration;
     }
 
     private static string BuildHelpSampleQuestion(string title)

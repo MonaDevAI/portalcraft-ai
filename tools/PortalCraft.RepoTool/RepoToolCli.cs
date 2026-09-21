@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace PortalCraft.RepoTool;
 
 public static class RepoToolCli
@@ -153,13 +155,20 @@ public static class RepoToolCli
             var helpDocuments = manualPaths.Count > 0
                 ? RepositoryKnowledgeBuilder.ReadDocumentation(repository, manualPaths)
                 : [];
+            var assistantConfiguration = ReadAssistantConfiguration(
+                repository,
+                GetOption(args, "--assistant-config"));
             var file = new IntegrationGenerator().GenerateAssistantIntegration(
                 profile,
                 outputFile,
                 helpDocuments,
-                args.Contains("--force", StringComparer.OrdinalIgnoreCase));
+                args.Contains("--force", StringComparer.OrdinalIgnoreCase),
+                assistantConfiguration);
             PrintSummary(profile);
             Console.WriteLine($"Help documents: {helpDocuments.Count}");
+            Console.WriteLine(
+                $"Assistant requirements: {assistantConfiguration?.LookupKeys.Count ?? 0} lookup keys, " +
+                $"{assistantConfiguration?.BusinessEntities.Count ?? 0} business entities");
             var helpSections = helpDocuments
                 .SelectMany(document => document.Sections.Count > 0
                     ? document.Sections
@@ -244,6 +253,30 @@ public static class RepoToolCli
         return values;
     }
 
+    private static PortalCraftAssistantConfiguration? ReadAssistantConfiguration(
+        string repository,
+        string? configurationPath)
+    {
+        if (configurationPath is null)
+        {
+            return null;
+        }
+
+        var path = Path.IsPathRooted(configurationPath)
+            ? configurationPath
+            : Path.Combine(repository, configurationPath);
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException($"Assistant configuration not found: {path}");
+        }
+
+        return JsonSerializer.Deserialize<PortalCraftAssistantConfiguration>(
+            File.ReadAllText(path),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? throw new InvalidOperationException(
+                $"Assistant configuration is empty or invalid: {path}");
+    }
+
     private static void PrintSummary(RepositoryProfile profile)
     {
         Console.WriteLine($"Repository: {profile.Repository}");
@@ -266,9 +299,9 @@ public static class RepoToolCli
               generate <repository> [--output <dir>] [--force]
                                                                Create a manifest and React/.NET scaffolding.
               assistant <repository> [--manuals-path <repo-relative-path>]...
-                        [--output <file>] [--force]
+                        [--assistant-config <repo-relative-json>] [--output <file>] [--force]
                                                                Generate typed assistant query, route, and optional
-                                                               reviewed help-document integration.
+                                                               reviewed help-document and portal requirement integration.
               copilot-studio <repository> [--product-name <name>] [--assistant-name <name>]
                              [--api-base-url <https-url>] [--branch <name>]
                              [--since-days <n>] [--limit <n>]

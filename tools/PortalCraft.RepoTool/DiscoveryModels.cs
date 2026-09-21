@@ -17,6 +17,33 @@ public sealed record QueryCandidate(
     string? ViewPath,
     IReadOnlyList<string> Parameters);
 
+public sealed record PortalCraftAssistantConfiguration
+{
+    public string AssistantName { get; init; } = "Portal Assistant";
+    public IReadOnlyList<PortalCraftLookupKey> LookupKeys { get; init; } = [];
+    public IReadOnlyList<PortalCraftBusinessEntity> BusinessEntities { get; init; } = [];
+}
+
+public sealed record PortalCraftLookupKey
+{
+    public string Id { get; init; } = "";
+    public string Label { get; init; } = "";
+    public string Example { get; init; } = "";
+    public IReadOnlyList<string> Aliases { get; init; } = [];
+}
+
+public sealed record PortalCraftBusinessEntity
+{
+    public string Id { get; init; } = "";
+    public string Label { get; init; } = "";
+    public string Group { get; init; } = "";
+    public IReadOnlyList<string> Aliases { get; init; } = [];
+    public string RequestRoute { get; init; } = "";
+    public string? RequestActionLabel { get; init; }
+    public IReadOnlyDictionary<string, string> RouteParameters { get; init; } =
+        new Dictionary<string, string>();
+}
+
 public sealed record RepositoryProfile(
     string Repository,
     DateTimeOffset GeneratedAt,

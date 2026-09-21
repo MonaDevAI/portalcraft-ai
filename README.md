@@ -107,6 +107,24 @@ portal queries and reviewed documentation.
    `answerPortalCraftHelpQuestion`, and use the constrained model with
    `portalCraftAssistantScopeInstruction` only when deterministic parsing does not match.
 
+Portal-specific lookup requirements can be supplied with `--assistant-config`:
+
+```powershell
+portalcraft-ai-repo assistant C:\src\portal `
+  --manuals-path docs\help `
+  --assistant-config docs\help\portalcraft-assistant.json `
+  --output src\components\Assistant\portalCraftAssistant.generated.ts `
+  --force
+```
+
+The JSON configuration declares the assistant name, supported lookup keys (for
+example Request ID and Validator CR), business-entity groups, existing portal request
+routes, and fixed route parameters such as a hierarchy entity. PortalCraft generates
+`answerPortalCraftLookupClarification` for incomplete lookup prompts and
+`buildPortalCraftRequestAction` for safe highlighted-request links. The product still
+registers explicit authorized read-only API executors; this configuration does not
+grant API access.
+
 This setup parses headings and section text from every approved manual path. A portal does
 not need separate PSA, OLS, Pool, or other product-specific definition routes; common
 “What does X mean?”, “Explain X”, and “X definition” questions are resolved against the
