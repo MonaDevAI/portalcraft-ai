@@ -1,36 +1,49 @@
 import { useState } from "react";
+import { AssistantConfig } from "./AssistantConfig";
 import { PortalCraft } from "./PortalCraft";
+import portalCraftLogo from "./assets/portalcraft-assistant-logo.png";
 import { productName } from "./config";
 import { RequestRecord } from "./types";
 import "./styles.css";
 
 export default function App() {
-  const [view, setView] = useState<"dashboard" | "requests" | "reviewQueue">("dashboard");
+  const [view, setView] = useState<"dashboard" | "requests" | "reviewQueue" | "assistantSetup">("dashboard");
   const [visibleRequests, setVisibleRequests] = useState<RequestRecord[]>([]);
+  const viewLabels = {
+    dashboard: "Dashboard",
+    requests: "Requests",
+    reviewQueue: "Review queue",
+    assistantSetup: "Assistant setup",
+  } as const;
 
   return (
     <div className="app">
       <header className="topbar">
-        <strong>{productName}</strong>
+        <img className="brand-logo" src={portalCraftLogo} alt="PortalCraft AI Assistant" />
+        <span className="product-context">{productName}</span>
         <em>DEMO</em>
         <div className="user">Alex Morgan <b>AM</b></div>
       </header>
       <div className="layout">
         <nav className="sidebar">
           <small>WORKSPACE</small>
-          {(["dashboard", "requests", "reviewQueue"] as const).map(item => (
+          {(["dashboard", "requests", "reviewQueue", "assistantSetup"] as const).map(item => (
             <button
               className={view === item ? "active" : ""}
               key={item}
               onClick={() => setView(item)}
             >
-              {item === "reviewQueue" ? "Review queue" : `${item[0].toUpperCase()}${item.slice(1)}`}
+              {viewLabels[item]}
             </button>
           ))}
         </nav>
         <main>
-          <h1>{view === "reviewQueue" ? "Review queue" : view[0].toUpperCase() + view.slice(1)}</h1>
-          <p className="subtitle">Synthetic data for the standalone PortalCraft AI reference application.</p>
+          <h1>{viewLabels[view]}</h1>
+          <p className="subtitle">
+            {view === "assistantSetup"
+              ? "Configure reusable assistant lookup and portal-navigation requirements."
+              : "Synthetic data for the standalone PortalCraft AI reference application."}
+          </p>
           {view === "dashboard" && (
             <section className="metrics">
               <div><span>Open requests</span><strong>14</strong><small>Across all teams</small></div>
@@ -39,6 +52,7 @@ export default function App() {
             </section>
           )}
           {view !== "dashboard" && (
+            view === "assistantSetup" ? <AssistantConfig /> :
             <section className="table-card">
               <h2>{view === "requests" ? "Request search results" : "Requests awaiting validation"}</h2>
               {visibleRequests.length === 0 ? (

@@ -125,6 +125,12 @@ routes, and fixed route parameters such as a hierarchy entity. PortalCraft gener
 registers explicit authorized read-only API executors; this configuration does not
 grant API access.
 
+The PortalCraft reference UI also includes an **Assistant setup** workspace for
+authoring this file without editing JSON manually. It supports repeated lookup keys and
+business entities, aliases, entity groups, existing portal routes, fixed route
+parameters, validation, JSON import, preview, copy, and download. The downloaded
+`portalcraft-assistant.json` uses the same schema consumed by `--assistant-config`.
+
 This setup parses headings and section text from every approved manual path. A portal does
 not need separate PSA, OLS, Pool, or other product-specific definition routes; common
 “What does X mean?”, “Explain X”, and “X definition” questions are resolved against the
