@@ -28,18 +28,21 @@ public sealed partial class RepositoryKnowledgeBuilder
         string repository,
         string? requestedBranch,
         int sinceDays,
-        int limit)
+        int limit,
+        IReadOnlyList<string>? manualPaths = null)
     {
         var report = new PullRequestScenarioAnalyzer().Analyze(
             repository,
             requestedBranch,
             sinceDays,
             limit);
-        var documents = ReadDocumentation(repository);
+        var documents = ReadDocumentation(repository, manualPaths);
         var warnings = report.Warnings.ToList();
         if (documents.Count == 0)
         {
-            warnings.Add("No repository Markdown documentation was found.");
+            warnings.Add(manualPaths?.Count > 0
+                ? "No Markdown help manuals were found in the selected paths."
+                : "No repository Markdown documentation was found.");
         }
 
         return new(
@@ -85,7 +88,9 @@ public sealed partial class RepositoryKnowledgeBuilder
         return [json, markdown, typescript];
     }
 
-    public static IReadOnlyList<RepositoryDocument> ReadDocumentation(string repository)
+    public static IReadOnlyList<RepositoryDocument> ReadDocumentation(
+        string repository,
+        IReadOnlyList<string>? manualPaths = null)
     {
         var root = Path.GetFullPath(repository);
         if (!Directory.Exists(root))
@@ -93,9 +98,12 @@ public sealed partial class RepositoryKnowledgeBuilder
             throw new DirectoryNotFoundException($"Repository directory does not exist: {root}");
         }
 
-        return Directory
-            .EnumerateFiles(root, "*.md", SearchOption.AllDirectories)
+        var files = manualPaths?.Count > 0
+            ? ResolveManualFiles(root, manualPaths)
+            : Directory.EnumerateFiles(root, "*.md", SearchOption.AllDirectories);
+        return files
             .Where(path => !ContainsExcludedDirectory(root, path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(path => DocumentationRank(root, path))
             .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
             .Take(40)
@@ -103,6 +111,51 @@ public sealed partial class RepositoryKnowledgeBuilder
             .Where(document => document is not null)
             .Cast<RepositoryDocument>()
             .ToArray();
+    }
+
+    private static IEnumerable<string> ResolveManualFiles(
+        string root,
+        IReadOnlyList<string> manualPaths)
+    {
+        foreach (var manualPath in manualPaths)
+        {
+            var candidate = Path.GetFullPath(Path.Combine(root, manualPath));
+            var relative = Path.GetRelativePath(root, candidate);
+            if (relative.Equals("..", StringComparison.Ordinal)
+                || relative.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                || Path.IsPathRooted(relative))
+            {
+                throw new ArgumentException(
+                    $"Help manual path must stay inside the repository: {manualPath}");
+            }
+
+            if (File.Exists(candidate))
+            {
+                if (!Path.GetExtension(candidate).Equals(".md", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException(
+                        $"Help manual files must use the .md extension: {manualPath}");
+                }
+                yield return candidate;
+                continue;
+            }
+
+            if (Directory.Exists(candidate))
+            {
+                foreach (var file in Directory.EnumerateFiles(
+                    candidate,
+                    "*.md",
+                    SearchOption.AllDirectories))
+                {
+                    yield return file;
+                }
+                continue;
+            }
+
+            throw new FileNotFoundException(
+                $"Help manual path does not exist: {manualPath}",
+                candidate);
+        }
     }
 
     public static string ClassifyChange(string title)
@@ -138,8 +191,12 @@ public sealed partial class RepositoryKnowledgeBuilder
             return null;
         }
 
-        var lines = content
-            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+        var rawLines = content.Split(['\r', '\n']);
+        var sourceUrl = ReadSourceUrl(rawLines);
+        var sourceTitle = ReadFrontMatterValue(rawLines, "sourceTitle");
+        var contentStart = FrontMatterEnd(rawLines);
+        var lines = rawLines
+            .Skip(contentStart)
             .Select(line => line.Trim())
             .Where(line => line.Length > 0)
             .ToArray();
@@ -150,6 +207,7 @@ public sealed partial class RepositoryKnowledgeBuilder
             .Where(line => !line.StartsWith('#')
                 && !line.StartsWith("```")
                 && !line.StartsWith('|')
+                && !line.StartsWith("<!--")
                 && !line.StartsWith("---"))
             .Take(6);
         var summary = CollapseWhitespace().Replace(string.Join(" ", summaryLines), " ").Trim();
@@ -165,7 +223,122 @@ public sealed partial class RepositoryKnowledgeBuilder
         return new(
             Path.GetRelativePath(root, path).Replace('\\', '/'),
             title.Length <= 160 ? title : title[..160],
-            summary);
+            summary,
+            sourceTitle,
+            sourceUrl,
+            ReadSections(rawLines, contentStart));
+    }
+
+    private static IReadOnlyList<RepositoryDocumentSection> ReadSections(
+        IReadOnlyList<string> lines,
+        int contentStart)
+    {
+        var sections = new List<RepositoryDocumentSection>();
+        string? title = null;
+        var content = new List<string>();
+
+        void AddSection()
+        {
+            if (title is null)
+            {
+                return;
+            }
+
+            var summary = CollapseWhitespace()
+                .Replace(string.Join(" ", content), " ")
+                .Trim();
+            if (summary.Length == 0)
+            {
+                return;
+            }
+            if (summary.Length > 1400)
+            {
+                summary = $"{summary[..1397]}...";
+            }
+
+            sections.Add(new(title, summary));
+        }
+
+        for (var index = contentStart; index < lines.Count; index++)
+        {
+            var line = lines[index].Trim();
+            if (line.StartsWith('#'))
+            {
+                AddSection();
+                title = line.TrimStart('#', ' ');
+                content.Clear();
+                continue;
+            }
+            if (title is null
+                || line.Length == 0
+                || line.StartsWith("```")
+                || line.StartsWith("<!--")
+                || line.Equals("---", StringComparison.Ordinal)
+                || Regex.IsMatch(line, @"^\|(?:\s*:?-+:?\s*\|)+$"))
+            {
+                continue;
+            }
+
+            content.Add(line.StartsWith('|')
+                ? line.Trim('|', ' ').Replace(" | ", "; ")
+                : Regex.Replace(line, @"^(?:[-*]\s+)", ""));
+        }
+
+        AddSection();
+        return sections;
+    }
+
+    private static int FrontMatterEnd(IReadOnlyList<string> lines)
+    {
+        if (lines.Count == 0 || !lines[0].Trim().Equals("---", StringComparison.Ordinal))
+        {
+            return 0;
+        }
+        for (var index = 1; index < lines.Count; index++)
+        {
+            if (lines[index].Trim().Equals("---", StringComparison.Ordinal))
+            {
+                return index + 1;
+            }
+        }
+        return 0;
+    }
+
+    private static string? ReadSourceUrl(IReadOnlyList<string> lines)
+    {
+        var value = ReadFrontMatterValue(lines, "sourceUrl");
+        if (value is null)
+        {
+            return null;
+        }
+        if (Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
+            uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            return uri.AbsoluteUri;
+        }
+        throw new ArgumentException(
+            $"Help manual sourceUrl must be an absolute HTTPS URL: {value}");
+    }
+
+    private static string? ReadFrontMatterValue(
+        IReadOnlyList<string> lines,
+        string name)
+    {
+        var end = FrontMatterEnd(lines);
+        if (end == 0)
+        {
+            return null;
+        }
+        var prefix = $"{name}:";
+        var line = lines
+            .Skip(1)
+            .Take(end - 2)
+            .Select(value => value.Trim())
+            .FirstOrDefault(value => value.StartsWith(
+                prefix,
+                StringComparison.OrdinalIgnoreCase));
+        var result = line?[prefix.Length..].Trim().Trim('"', '\'');
+        return string.IsNullOrWhiteSpace(result) ? null : result;
     }
 
     private static bool ContainsExcludedDirectory(string root, string path)
@@ -243,7 +416,10 @@ public sealed partial class RepositoryKnowledgeBuilder
             : string.Join(
                 Environment.NewLine,
                 knowledge.Documents.Select(document =>
-                    $"- `{document.Path}` — **{document.Title}**: {document.Summary}"));
+                    $"- `{document.Path}` — **{document.Title}**" +
+                    $"{(document.SourceTitle is null ? "" : $" (source: {document.SourceTitle})")}" +
+                    $"{(document.SourceUrl is null ? "" : $" ([source]({document.SourceUrl}))")}: " +
+                    document.Summary));
         var changes = knowledge.Changes.Count == 0
             ? "- No recent changes found."
             : string.Join(

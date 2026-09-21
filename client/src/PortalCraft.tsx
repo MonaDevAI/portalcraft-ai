@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { askPortalCraft } from "./api";
+import portalCraftLogo from "./assets/portalcraft-assistant-logo.png";
 import { assistantName, productName } from "./config";
 import { ChatMessage, RequestRecord } from "./types";
 
@@ -65,7 +66,7 @@ export function PortalCraft({ onOpenView }: Props) {
       </button>
       <aside className={`assistant ${open ? "open" : ""}`} aria-label={assistantName}>
         <header className="assistant-header">
-          <div className="iq-logo">IQ</div>
+          <img className="assistant-brand-logo" src={portalCraftLogo} alt="" />
           <div>
             <strong>{assistantName}</strong>
             <span>Grounded assistance for {productName}</span>

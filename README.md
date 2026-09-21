@@ -62,6 +62,10 @@ dotnet run --project tools\PortalCraft.RepoTool -- analyze C:\path\to\product
 
 dotnet run --project tools\PortalCraft.RepoTool -- generate C:\path\to\product `
   --output C:\path\to\product\.portalcraft-ai
+
+dotnet run --project tools\PortalCraft.RepoTool -- assistant C:\path\to\product `
+  --manuals-path docs\help `
+  --output C:\path\to\product\src\portalCraftAssistant.generated.ts
 ```
 
 Generated output includes:
@@ -69,9 +73,80 @@ Generated output includes:
 - `portalcraft-ai.manifest.json` with discovered evidence and query candidates
 - `server\PortalCraftGeneratedCatalog.cs` with a typed catalog API
 - `client\portalCraft.generated.ts` with typed query descriptors
+- `client\portalCraftAssistant.generated.ts` with safe, discovered in-portal route helpers
+  plus reusable greetings, capability answers, scope instructions, and optional reviewed
+  help-document topics with generic question parsing, semantic matching, and clickable citations
 - `client\PortalCraftGeneratedPanel.tsx` with reusable prompt UI
 - `dashboard\index.html` with an immediately runnable repository dashboard
 - integration instructions and safety checks
+
+When `assistant` receives one or more `--manuals-path` values, it also emits canonical
+`explain help topic <topic-id>` commands. A product's existing model can translate
+paraphrased questions to those allowlisted commands, while the generated module returns
+only reviewed document text and source citations. It also includes deterministic local
+matching for applications that do not use a model.
+
+Generated assistants expose `answerPortalCraftConversation` for greetings, thanks, and
+capability questions. `answerPortalCraftHelpQuestion` and
+`portalCraftHelpQuestionPatterns` parse common document questions such as “What does X
+mean?”, “Explain X”, and “X definition” without product-specific routing tables.
+`portalCraftAssistantScopeInstruction` keeps model fallbacks within discovered read-only
+portal queries and reviewed documentation.
+
+### Set up a reviewed help-manual assistant
+
+1. Place approved Markdown manuals under the target repository, with optional
+   `sourceTitle` and HTTPS `sourceUrl` YAML metadata for citations.
+2. Run the `assistant` command with one or more `--manuals-path` values.
+3. Review the parsed document and topic counts plus the sample questions printed by the
+   command.
+4. Use the generated `portalCraftAssistantSetup` and
+   `portalCraftAssistantSampleQuestions` exports to show users the supported question
+   types and document-derived starters.
+5. Call `answerPortalCraftConversation` first, then
+   `answerPortalCraftHelpQuestion`, and use the constrained model with
+   `portalCraftAssistantScopeInstruction` only when deterministic parsing does not match.
+
+Portal-specific lookup requirements can be supplied with `--assistant-config`:
+
+```powershell
+portalcraft-ai-repo assistant C:\src\portal `
+  --manuals-path docs\help `
+  --assistant-config docs\help\portalcraft-assistant.json `
+  --output src\components\Assistant\portalCraftAssistant.generated.ts `
+  --force
+```
+
+The JSON configuration declares the assistant name, supported lookup keys (for
+example Request ID and Validator CR), business-entity groups, existing portal request
+routes, and fixed route parameters such as a hierarchy entity. PortalCraft generates
+`answerPortalCraftLookupClarification` for incomplete lookup prompts and
+`buildPortalCraftRequestAction` for safe highlighted-request links. The product still
+registers explicit authorized read-only API executors; this configuration does not
+grant API access.
+
+The PortalCraft reference UI also includes an **Assistant setup** workspace for
+authoring this file without editing JSON manually. It supports repeated lookup keys and
+business entities, aliases, entity groups, existing portal routes, fixed route
+parameters, validation, JSON import, preview, copy, and download. The downloaded
+`portalcraft-assistant.json` uses the same schema consumed by `--assistant-config`.
+
+This setup parses headings and section text from every approved manual path. A portal does
+not need separate PSA, OLS, Pool, or other product-specific definition routes; common
+“What does X mean?”, “Explain X”, and “X definition” questions are resolved against the
+generated reviewed topics.
+
+For API-backed questions, PortalCraft generates `portalCraftQueryCommandDescription`,
+`findPortalCraftAssistantQuery`, `parsePortalCraftQueryCommand`, and
+`executePortalCraftQueryCommand`. The model converts natural language into an allowlisted
+`run portal query <query-id> with <json>` command; PortalCraft validates the query and its
+parameters before calling a product-owned executor. The portal supplies only the
+authorized operation adapters that fetch its data, while query phrasing and parsing stay
+shared.
+
+Product executors can return Copilot-style Markdown through
+`formatPortalCraftQueryResult`, including a concise summary, labeled fields, detail
+sections, and safe internal or HTTPS action links such as “Open highlighted request.”
 
 Discovered `GET` operations and clearly named read-only POST searches (`search`, `filter`,
 `lookup`, or `query`) become query candidates. Create, update, submit, approve, reject,
@@ -130,14 +205,57 @@ a build-time knowledge package for an adopting assistant:
 ```powershell
 dotnet run --project tools\PortalCraft.RepoTool -- knowledge C:\path\to\product `
   --branch develop --since-days 180 --limit 100 `
+  --manuals-path docs\help `
   --output C:\path\to\product\.portalcraft-ai\knowledge
 ```
 
 The command writes JSON, Markdown, and a typed TypeScript module containing documentation
 summaries plus categorized bug fixes, enhancements, security changes, and other commits.
+Repeat `--manuals-path` to restrict documentation ingestion to approved repository-relative
+manual files or directories. When omitted, PortalCraft retains its repository-wide Markdown
+discovery behavior. Paths outside the repository and non-Markdown manual files are rejected.
+Manuals may declare an approved external source link in YAML front matter:
+
+```markdown
+---
+sourceTitle: Product help manual
+sourceUrl: https://contoso.sharepoint.com/sites/product/manual
+---
+```
+
+`sourceTitle` controls the user-facing citation label. Only absolute HTTPS links are
+retained in generated knowledge and invalid links fail generation.
 It reads repository files and Git history without executing product code. Teams must review
 the generated package before integration and continue to use authorized product APIs for
 live business data.
+
+### Generate a Copilot Studio assistant package
+
+PortalCraft AI can combine repository discovery and reviewed knowledge into a Copilot Studio
+onboarding package:
+
+```powershell
+dotnet run --project tools\PortalCraft.RepoTool -- copilot-studio C:\path\to\product `
+  --product-name "Product Portal" `
+  --assistant-name "Product Assistant" `
+  --api-base-url https://product-api.contoso.com `
+  --branch develop `
+  --manuals-path docs\help `
+  --output C:\path\to\product\.portalcraft-ai\copilot-studio
+```
+
+The package contains:
+
+- natural-language agent instructions that treat paraphrases and business synonyms as the
+  same intent when supported by evidence
+- an OpenAPI document containing only discovered read-only query candidates
+- a knowledge-source manifest for approved SharePoint links and repository manuals
+- secure custom-application channel settings for a server-side token broker
+- an import and product-review checklist
+
+The generator does not publish to a Power Platform environment or create credentials.
+Product owners must review API contracts, configure Microsoft Entra ID authentication,
+add approved knowledge sources, test permissions, and publish the agent in Copilot Studio.
 
 ## Run locally
 

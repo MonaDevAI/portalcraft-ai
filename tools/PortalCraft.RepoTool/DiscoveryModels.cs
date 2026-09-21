@@ -17,6 +17,33 @@ public sealed record QueryCandidate(
     string? ViewPath,
     IReadOnlyList<string> Parameters);
 
+public sealed record PortalCraftAssistantConfiguration
+{
+    public string AssistantName { get; init; } = "Portal Assistant";
+    public IReadOnlyList<PortalCraftLookupKey> LookupKeys { get; init; } = [];
+    public IReadOnlyList<PortalCraftBusinessEntity> BusinessEntities { get; init; } = [];
+}
+
+public sealed record PortalCraftLookupKey
+{
+    public string Id { get; init; } = "";
+    public string Label { get; init; } = "";
+    public string Example { get; init; } = "";
+    public IReadOnlyList<string> Aliases { get; init; } = [];
+}
+
+public sealed record PortalCraftBusinessEntity
+{
+    public string Id { get; init; } = "";
+    public string Label { get; init; } = "";
+    public string Group { get; init; } = "";
+    public IReadOnlyList<string> Aliases { get; init; } = [];
+    public string RequestRoute { get; init; } = "";
+    public string? RequestActionLabel { get; init; }
+    public IReadOnlyDictionary<string, string> RouteParameters { get; init; } =
+        new Dictionary<string, string>();
+}
+
 public sealed record RepositoryProfile(
     string Repository,
     DateTimeOffset GeneratedAt,
@@ -57,6 +84,13 @@ public sealed record PullRequestScenarioReport(
 public sealed record RepositoryDocument(
     string Path,
     string Title,
+    string Summary,
+    string? SourceTitle,
+    string? SourceUrl,
+    IReadOnlyList<RepositoryDocumentSection> Sections);
+
+public sealed record RepositoryDocumentSection(
+    string Title,
     string Summary);
 
 public sealed record RepositoryChangeInsight(
@@ -73,4 +107,11 @@ public sealed record RepositoryKnowledge(
     DateTimeOffset GeneratedAt,
     IReadOnlyList<RepositoryDocument> Documents,
     IReadOnlyList<RepositoryChangeInsight> Changes,
+    IReadOnlyList<string> Warnings);
+
+public sealed record CopilotStudioPackageResult(
+    string ProductName,
+    string AssistantName,
+    string OutputDirectory,
+    IReadOnlyList<string> Files,
     IReadOnlyList<string> Warnings);
