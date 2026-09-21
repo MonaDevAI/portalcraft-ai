@@ -160,6 +160,20 @@ public static class RepoToolCli
                 args.Contains("--force", StringComparer.OrdinalIgnoreCase));
             PrintSummary(profile);
             Console.WriteLine($"Help documents: {helpDocuments.Count}");
+            var helpSections = helpDocuments
+                .SelectMany(document => document.Sections.Count > 0
+                    ? document.Sections
+                    : [new RepositoryDocumentSection("Overview", document.Summary)])
+                .ToArray();
+            Console.WriteLine($"Help topics: {helpSections.Length}");
+            if (helpSections.Length > 0)
+            {
+                Console.WriteLine("Sample help questions:");
+                foreach (var section in helpSections.Take(5))
+                {
+                    Console.WriteLine($"  Explain {section.Title}");
+                }
+            }
             Console.WriteLine($"Generated assistant integration: {file}");
             return 0;
         }

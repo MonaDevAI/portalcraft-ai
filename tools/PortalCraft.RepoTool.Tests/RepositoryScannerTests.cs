@@ -173,8 +173,27 @@ public sealed class RepositoryScannerTests : IDisposable
 
         var generated = File.ReadAllText(output);
         Assert.Contains("portalCraftHelpTopics", generated);
+        Assert.Contains("portalCraftQueryCommandDescription", generated);
+        Assert.Contains("findPortalCraftAssistantQuery", generated);
+        Assert.Contains("parsePortalCraftQueryCommand", generated);
+        Assert.Contains("executePortalCraftQueryCommand", generated);
+        Assert.Contains("describePortalCraftQueries", generated);
+        Assert.Contains("No authorized executor is registered", generated);
+        Assert.Contains("Unsupported query parameters", generated);
         Assert.Contains("portalCraftHelpCommandDescription", generated);
         Assert.Contains("answerPortalCraftHelpTopic", generated);
+        Assert.Contains("portalCraftHelpQuestionPatterns", generated);
+        Assert.Contains("answerPortalCraftHelpQuestion", generated);
+        Assert.Contains("answerPortalCraftConversation", generated);
+        Assert.Contains("portalCraftAssistantScopeInstruction", generated);
+        Assert.Contains("portalCraftConversationPatterns", generated);
+        Assert.Contains("portalCraftHelpSampleQuestions", generated);
+        Assert.Contains("portalCraftAssistantSampleQuestions", generated);
+        Assert.Contains("portalCraftAssistantSetup", generated);
+        Assert.Contains("parsedHelpTopicCount", generated);
+        Assert.Contains("Explain Prepare a request", generated);
+        Assert.Contains("I can run verified read-only portal queries", generated);
+        Assert.Contains("Do not answer from model knowledge", generated);
         Assert.Contains("request-guidance-prepare-a-request", generated);
         Assert.Contains("Gather the request type", generated);
         Assert.Contains("https://contoso.sharepoint.com/sites/portal/requests", generated);

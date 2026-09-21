@@ -74,7 +74,8 @@ Generated output includes:
 - `server\PortalCraftGeneratedCatalog.cs` with a typed catalog API
 - `client\portalCraft.generated.ts` with typed query descriptors
 - `client\portalCraftAssistant.generated.ts` with safe, discovered in-portal route helpers
-  and optional reviewed help-document topics, semantic matching, and clickable citations
+  plus reusable greetings, capability answers, scope instructions, and optional reviewed
+  help-document topics with generic question parsing, semantic matching, and clickable citations
 - `client\PortalCraftGeneratedPanel.tsx` with reusable prompt UI
 - `dashboard\index.html` with an immediately runnable repository dashboard
 - integration instructions and safety checks
@@ -84,6 +85,40 @@ When `assistant` receives one or more `--manuals-path` values, it also emits can
 paraphrased questions to those allowlisted commands, while the generated module returns
 only reviewed document text and source citations. It also includes deterministic local
 matching for applications that do not use a model.
+
+Generated assistants expose `answerPortalCraftConversation` for greetings, thanks, and
+capability questions. `answerPortalCraftHelpQuestion` and
+`portalCraftHelpQuestionPatterns` parse common document questions such as “What does X
+mean?”, “Explain X”, and “X definition” without product-specific routing tables.
+`portalCraftAssistantScopeInstruction` keeps model fallbacks within discovered read-only
+portal queries and reviewed documentation.
+
+### Set up a reviewed help-manual assistant
+
+1. Place approved Markdown manuals under the target repository, with optional
+   `sourceTitle` and HTTPS `sourceUrl` YAML metadata for citations.
+2. Run the `assistant` command with one or more `--manuals-path` values.
+3. Review the parsed document and topic counts plus the sample questions printed by the
+   command.
+4. Use the generated `portalCraftAssistantSetup` and
+   `portalCraftAssistantSampleQuestions` exports to show users the supported question
+   types and document-derived starters.
+5. Call `answerPortalCraftConversation` first, then
+   `answerPortalCraftHelpQuestion`, and use the constrained model with
+   `portalCraftAssistantScopeInstruction` only when deterministic parsing does not match.
+
+This setup parses headings and section text from every approved manual path. A portal does
+not need separate PSA, OLS, Pool, or other product-specific definition routes; common
+“What does X mean?”, “Explain X”, and “X definition” questions are resolved against the
+generated reviewed topics.
+
+For API-backed questions, PortalCraft generates `portalCraftQueryCommandDescription`,
+`findPortalCraftAssistantQuery`, `parsePortalCraftQueryCommand`, and
+`executePortalCraftQueryCommand`. The model converts natural language into an allowlisted
+`run portal query <query-id> with <json>` command; PortalCraft validates the query and its
+parameters before calling a product-owned executor. The portal supplies only the
+authorized operation adapters that fetch its data, while query phrasing and parsing stay
+shared.
 
 Discovered `GET` operations and clearly named read-only POST searches (`search`, `filter`,
 `lookup`, or `query`) become query candidates. Create, update, submit, approve, reject,
