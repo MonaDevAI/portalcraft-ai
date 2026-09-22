@@ -19,12 +19,14 @@ type BusinessEntityDraft = {
 
 type AssistantConfigurationDraft = {
   assistantName: string;
+  assistantIcon: "portalcraft" | "host-default";
   lookupKeys: LookupKeyDraft[];
   businessEntities: BusinessEntityDraft[];
 };
 
 type PortalCraftAssistantConfiguration = {
   assistantName: string;
+  assistantIcon: "portalcraft" | "host-default";
   lookupKeys: Array<{
     id: string;
     label: string;
@@ -44,6 +46,7 @@ type PortalCraftAssistantConfiguration = {
 
 const initialDraft: AssistantConfigurationDraft = {
   assistantName: "Portal Assistant",
+  assistantIcon: "portalcraft",
   lookupKeys: [
     {
       id: "requestId",
@@ -99,6 +102,7 @@ function buildConfiguration(
 ): PortalCraftAssistantConfiguration {
   return {
     assistantName: draft.assistantName.trim(),
+    assistantIcon: draft.assistantIcon,
     lookupKeys: draft.lookupKeys.map(key => ({
       id: key.id.trim(),
       label: key.label.trim(),
@@ -174,6 +178,9 @@ function importDraft(value: unknown): AssistantConfigurationDraft {
   }
   return {
     assistantName: readString(configuration.assistantName, "assistantName"),
+    assistantIcon: configuration.assistantIcon === "host-default"
+      ? "host-default"
+      : "portalcraft",
     lookupKeys: configuration.lookupKeys.map((item, index) => {
       if (!item || typeof item !== "object") throw new Error(`lookupKeys[${index}] must be an object.`);
       const key = item as Record<string, unknown>;
@@ -292,6 +299,20 @@ export function AssistantConfig() {
           value={draft.assistantName}
           onChange={event => setDraft(current => ({ ...current, assistantName: event.target.value }))}
         />
+      </label>
+      <label className="field">
+        <span>Assistant icon</span>
+        <select
+          aria-label="Assistant icon"
+          value={draft.assistantIcon}
+          onChange={event => setDraft(current => ({
+            ...current,
+            assistantIcon: event.target.value as AssistantConfigurationDraft["assistantIcon"],
+          }))}
+        >
+          <option value="portalcraft">PortalCraft AI</option>
+          <option value="host-default">Host portal default</option>
+        </select>
       </label>
 
       <div className="config-section-heading">

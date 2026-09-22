@@ -226,12 +226,18 @@ public sealed class IntegrationGenerator
 
         export type PortalCraftAssistantRequirements = {
           assistantName: string;
+          assistantIcon: "portalcraft" | "host-default";
           lookupKeys: readonly PortalCraftAssistantLookupKey[];
           businessEntities: readonly PortalCraftAssistantBusinessEntity[];
         };
 
         export const portalCraftAssistantRequirements: PortalCraftAssistantRequirements =
           {{JsonSerializer.Serialize(assistantConfiguration, JsonOptions)}};
+
+        export const portalCraftAssistantIconDataUrl =
+          portalCraftAssistantRequirements.assistantIcon === "portalcraft"
+            ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop stop-color='%2349d3ff'/%3E%3Cstop offset='.55' stop-color='%237b8cff'/%3E%3Cstop offset='1' stop-color='%23c36bff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M10 53V28C10 16 20 6 32 6s22 10 22 22v25h-9V28c0-7-6-13-13-13s-13 6-13 13v25z' fill='none' stroke='url(%23g)' stroke-width='7' stroke-linejoin='round'/%3E%3Cpath d='M24 53V31c0-4 4-8 8-8s8 4 8 8v22' fill='none' stroke='%23d8f7ff' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M6 53h52' stroke='%2349d3ff' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"
+            : undefined;
 
         export const portalCraftAssistantQueries =
           {{JsonSerializer.Serialize(profile.QueryCandidates, JsonOptions)}} as const;
@@ -709,6 +715,11 @@ public sealed class IntegrationGenerator
         if (string.IsNullOrWhiteSpace(configuration.AssistantName))
         {
             throw new InvalidOperationException("Assistant configuration requires assistantName.");
+        }
+        if (configuration.AssistantIcon is not ("portalcraft" or "host-default"))
+        {
+            throw new InvalidOperationException(
+                "Assistant configuration assistantIcon must be portalcraft or host-default.");
         }
         if (configuration.LookupKeys.Select(key => key.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count()
             != configuration.LookupKeys.Count)

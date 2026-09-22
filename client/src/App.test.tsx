@@ -44,6 +44,9 @@ test("authors assistant requirements and previews generator-compatible JSON", ()
   fireEvent.change(screen.getByLabelText("Assistant name"), {
     target: { value: "FMDM Assistant" },
   });
+  fireEvent.change(screen.getByLabelText("Assistant icon"), {
+    target: { value: "portalcraft" },
+  });
   fireEvent.change(screen.getByLabelText("Business entity 1 ID"), {
     target: { value: "ProductUnit" },
   });
@@ -65,6 +68,7 @@ test("authors assistant requirements and previews generator-compatible JSON", ()
 
   const preview = screen.getByLabelText("Assistant configuration JSON");
   expect(preview).toHaveTextContent('"assistantName": "FMDM Assistant"');
+  expect(preview).toHaveTextContent('"assistantIcon": "portalcraft"');
   expect(preview).toHaveTextContent('"validatorCRNumber"');
   expect(preview).toHaveTextContent('"requestRoute": "/search-product-hierarchy-requests"');
   expect(preview).toHaveTextContent('"hierarchyEntity": "ProductUnit"');

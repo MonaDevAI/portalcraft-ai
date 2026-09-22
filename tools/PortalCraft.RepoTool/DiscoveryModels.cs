@@ -20,6 +20,7 @@ public sealed record QueryCandidate(
 public sealed record PortalCraftAssistantConfiguration
 {
     public string AssistantName { get; init; } = "Portal Assistant";
+    public string AssistantIcon { get; init; } = "portalcraft";
     public IReadOnlyList<PortalCraftLookupKey> LookupKeys { get; init; } = [];
     public IReadOnlyList<PortalCraftBusinessEntity> BusinessEntities { get; init; } = [];
 }

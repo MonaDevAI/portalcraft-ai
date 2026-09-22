@@ -211,6 +211,7 @@ public sealed class RepositoryScannerTests : IDisposable
         var configuration = new PortalCraftAssistantConfiguration
         {
             AssistantName = "Contoso Assistant",
+            AssistantIcon = "portalcraft",
             LookupKeys =
             [
                 new PortalCraftLookupKey
@@ -256,6 +257,8 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains("portalCraftLookupClarificationPatterns", generated);
         Assert.Contains("buildPortalCraftRequestAction", generated);
         Assert.Contains("Contoso Assistant", generated);
+        Assert.Contains("portalCraftAssistantIconDataUrl", generated);
+        Assert.Contains("\"assistantIcon\": \"portalcraft\"", generated);
         Assert.Contains("Validator CR", generated);
         Assert.Contains("Product Unit", generated);
         Assert.Contains("/search-product-hierarchy-requests", generated);

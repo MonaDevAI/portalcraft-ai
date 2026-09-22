@@ -117,11 +117,13 @@ portalcraft-ai-repo assistant C:\src\portal `
   --force
 ```
 
-The JSON configuration declares the assistant name, supported lookup keys (for
+The JSON configuration declares the assistant name, assistant icon, supported lookup keys (for
 example Request ID and Validator CR), business-entity groups, existing portal request
 routes, and fixed route parameters such as a hierarchy entity. PortalCraft generates
 `answerPortalCraftLookupClarification` for incomplete lookup prompts and
-`buildPortalCraftRequestAction` for safe highlighted-request links. The product still
+`buildPortalCraftRequestAction` for safe highlighted-request links. Set `assistantIcon`
+to `portalcraft` to use the generated `portalCraftAssistantIconDataUrl` in launcher and
+header image elements, or use `host-default` to retain the portal's existing icon. The product still
 registers explicit authorized read-only API executors; this configuration does not
 grant API access.
 
