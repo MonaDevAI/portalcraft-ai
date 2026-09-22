@@ -168,6 +168,10 @@ For end-to-end setup, branding, generation, and integration checks, see
 [Installation and repository onboarding](docs/installation.md). A one-command
 PowerShell helper is also available:
 
+For a product-owner workflow that separates generated Assistant capabilities
+from required product adapters, see
+[Guided assistant setup](docs/guided-assistant-setup.md).
+
 ```powershell
 .\scripts\install-portalcraft-ai.ps1 `
   -TargetRepository C:\path\to\product `
