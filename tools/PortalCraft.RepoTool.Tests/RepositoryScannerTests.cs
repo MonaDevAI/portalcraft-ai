@@ -258,6 +258,8 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains("buildPortalCraftRequestAction", generated);
         Assert.Contains("Contoso Assistant", generated);
         Assert.Contains("portalCraftAssistantIconDataUrl", generated);
+        Assert.Contains("M12 14h24c10 0 18 8 18 18", generated);
+        Assert.DoesNotContain("linearGradient", generated);
         Assert.Contains("\"assistantIcon\": \"portalcraft\"", generated);
         Assert.Contains("Validator CR", generated);
         Assert.Contains("Product Unit", generated);
