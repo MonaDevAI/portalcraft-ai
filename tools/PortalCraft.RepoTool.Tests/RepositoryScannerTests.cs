@@ -186,6 +186,11 @@ public sealed class RepositoryScannerTests : IDisposable
         Assert.Contains("answerPortalCraftHelpTopic", generated);
         Assert.Contains("portalCraftHelpQuestionPatterns", generated);
         Assert.Contains("answerPortalCraftHelpQuestion", generated);
+        Assert.Contains("MIN_HELP_TOPIC_SCORE = 3", generated);
+        Assert.Contains("item.score >= MIN_HELP_TOPIC_SCORE", generated);
+        Assert.Contains("const title = topic.title.toLowerCase();", generated);
+        Assert.DoesNotContain("`${topic.documentTitle} ${topic.title}`", generated);
+        Assert.Contains("topic.title.trim().toLowerCase() === topic.documentTitle.trim().toLowerCase()", generated);
         Assert.Contains("answerPortalCraftConversation", generated);
         Assert.Contains("portalCraftAssistantScopeInstruction", generated);
         Assert.Contains("portalCraftConversationPatterns", generated);

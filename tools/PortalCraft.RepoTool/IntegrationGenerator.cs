@@ -314,6 +314,7 @@ public sealed class IntegrationGenerator
           "then", "there", "this", "what", "when", "where", "which", "with",
           "would", "your"
         ]);
+        const MIN_HELP_TOPIC_SCORE = 3;
 
         export const portalCraftHelpCommandDescription = [
           "`explain help topic <topic-id>` — answer only from a reviewed help-document topic",
@@ -649,7 +650,10 @@ public sealed class IntegrationGenerator
           terms: readonly string[],
           topic: PortalCraftHelpTopic
         ): number {
-          const title = `${topic.documentTitle} ${topic.title}`.toLowerCase();
+          if (topic.title.trim().toLowerCase() === topic.documentTitle.trim().toLowerCase()) {
+            return 0;
+          }
+          const title = topic.title.toLowerCase();
           const summary = topic.summary.toLowerCase();
           return terms.reduce((score, term) => {
             if (title.includes(term)) return score + 3;
@@ -670,7 +674,7 @@ public sealed class IntegrationGenerator
           if (terms.length === 0) return undefined;
           return portalCraftHelpTopics
             .map(topic => ({ topic, score: helpTopicScore(terms, topic) }))
-            .filter(item => item.score > 0)
+            .filter(item => item.score >= MIN_HELP_TOPIC_SCORE)
             .sort((left, right) => right.score - left.score)[0]?.topic;
         }
 
